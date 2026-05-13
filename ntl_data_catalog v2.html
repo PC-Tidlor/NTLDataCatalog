@@ -1,0 +1,1637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>NTL Data Catalog</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#F6F5F2;--surface:#fff;--border:#E2DFD8;--border2:#EDE9E2;
+  --text:#111;--text2:#555;--text3:#999;
+  --blue:#1856A0;--blue-light:#EBF2FC;--blue-mid:#C8DEFA;
+  --green:#0C6B50;--green-light:#E2F4EE;
+  --amber:#7A4800;--amber-light:#FEF0D8;
+  --purple:#4B3BAA;--purple-light:#EEEDFE;
+  --red:#B91C1C;--red-light:#FEE2E2;
+  --teal:#0B5C56;--teal-light:#E0F4F2;
+  --gray-light:#F0EEE9;
+  --font:'IBM Plex Sans',sans-serif;
+  --mono:'IBM Plex Mono',monospace;
+  --radius:8px;--radius-lg:12px;
+  --shadow:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:13px;line-height:1.5}
+/* ── LAYOUT ── */
+.portal{display:flex;height:100vh;overflow:hidden}
+/* ── SIDEBAR ── */
+.sb{width:216px;min-width:216px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
+.sb-logo{padding:14px 13px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px}
+.sb-icon{width:28px;height:28px;background:#E8192C;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sb-icon svg{width:15px;height:15px}
+.sb-brand{font-size:12px;font-weight:700;color:var(--text);line-height:1.2}
+.sb-tagline{font-size:10px;color:var(--text3);margin-top:1px}
+.sb-body{flex:1;overflow-y:auto;padding:6px 0}
+.sb-sec{padding:0 0 4px}
+.sb-lbl{font-size:9px;font-weight:700;color:#bbb;letter-spacing:.12em;text-transform:uppercase;padding:8px 13px 3px}
+.ni{display:flex;align-items:center;gap:8px;padding:7px 13px;cursor:pointer;font-size:12px;color:var(--text2);border-left:2px solid transparent;user-select:none;transition:background .12s,color .12s}
+.ni:hover{background:var(--gray-light);color:var(--text)}
+.ni svg{width:13px;height:13px;min-width:13px;min-height:13px;max-width:13px;max-height:13px;flex-shrink:0;opacity:.7}
+.ni.active{background:var(--blue-light);color:var(--blue);border-left-color:var(--blue);font-weight:600}
+.ni.active svg{opacity:1}
+.ni.admin-ni.active{background:var(--amber-light);color:var(--amber);border-left-color:var(--amber);font-weight:600}
+.ni.admin-ni.active svg{opacity:1}
+.nb{margin-left:auto;font-size:9px;padding:2px 5px;border-radius:9px;font-weight:600}
+.nb-r{background:var(--red-light);color:var(--red)}
+.nb-b{background:var(--blue-light);color:var(--blue)}
+.sb-div{border-top:1px solid var(--border2);margin:6px 0}
+.sb-user{padding:10px 13px;border-top:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-shrink:0}
+.av{width:27px;height:27px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+.av-b{background:var(--blue-light);color:var(--blue)}
+.av-g{background:var(--green-light);color:var(--green)}
+.av-a{background:var(--amber-light);color:var(--amber)}
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:9px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.bc{font-size:11px;color:var(--text3);flex-shrink:0;white-space:nowrap}
+.bc span{color:var(--text);font-weight:600}
+.sw{flex:1;position:relative;max-width:520px}
+.sw svg{position:absolute;left:9px;top:50%;transform:translateY(-50%);width:13px;height:13px;color:#bbb;pointer-events:none}
+.sw input{width:100%;padding:6px 10px 6px 29px;font-size:12px;background:var(--gray-light);border:1px solid var(--border);border-radius:7px;color:var(--text);outline:none;font-family:var(--font)}
+.sw input:focus{border-color:var(--blue);background:#fff}
+.content{flex:1;overflow-y:auto;padding:16px}
+/* ── PAGES ── */
+.page{display:none}.page.active{display:block}
+/* ── PAGE HEADER ── */
+.ph{margin-bottom:14px}
+.ph-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:2px}
+.ph-sub{font-size:11px;color:var(--text3)}
+/* ── STAT CARDS ── */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 13px}
+.stat-lbl{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;font-weight:600}
+.stat-val{font-size:24px;font-weight:700;font-family:var(--mono)}
+.stat-val.blue{color:var(--blue)}.stat-val.green{color:var(--green)}.stat-val.amber{color:var(--amber)}
+/* ── SCHEMA BROWSER ── */
+.schema-wrap{display:flex;gap:0;height:calc(100vh - 158px);position:relative}
+/* tree panel */
+.tree-panel{display:flex;flex-direction:column;width:230px;min-width:230px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg) 0 0 var(--radius-lg);overflow:hidden;transition:width .18s,min-width .18s;flex-shrink:0}
+.tree-panel.collapsed{width:0;min-width:0;border-width:0}
+.tree-head{padding:8px 9px;border-bottom:1px solid var(--border2);display:flex;align-items:center;gap:6px;flex-shrink:0}
+.tree-head button.hide-btn:hover{background:var(--border);color:var(--text)}
+.tree-srch{position:relative;flex:1}
+.tree-srch svg{position:absolute;left:7px;top:50%;transform:translateY(-50%);width:11px;height:11px;color:#bbb;pointer-events:none}
+.tree-srch input{width:100%;padding:5px 7px 5px 22px;font-size:11px;background:var(--gray-light);border:1px solid var(--border);border-radius:5px;outline:none;font-family:var(--font)}
+.tree-srch input:focus{border-color:var(--blue);background:#fff}
+.tree-body{overflow-y:auto;flex:1}
+/* toggle strip — always visible between tree and detail */
+.tree-toggle-strip{
+  width:14px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--gray-light);
+  border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+  cursor:pointer;position:relative;
+  transition:background .12s;
+  user-select:none;
+}
+.tree-toggle-strip:hover{background:var(--blue-mid)}
+.tree-toggle-strip::before{
+  content:'';position:absolute;top:0;bottom:0;left:0;
+  border-left:1px solid var(--border);
+}
+.tree-toggle-strip::after{
+  content:'';position:absolute;top:0;bottom:0;right:0;
+  border-right:1px solid var(--border);
+}
+.tts-chevron{
+  width:10px;height:10px;color:var(--text3);
+  transition:transform .18s;flex-shrink:0;
+}
+.tree-panel.collapsed ~ .tree-toggle-strip .tts-chevron{transform:rotate(180deg)}
+/* detail panel gets a left-flush border when tree hidden */
+.detail-panel{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:0 var(--radius-lg) var(--radius-lg) 0;display:flex;flex-direction:column;overflow:hidden;min-width:0;transition:border-radius .18s}
+.schema-grp{border-bottom:1px solid var(--border2)}
+.sg-hd{display:flex;align-items:center;gap:7px;padding:8px 10px;cursor:pointer;user-select:none}
+.sg-hd:hover{background:var(--gray-light)}
+.sg-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.sg-name{font-size:11px;font-weight:700;color:var(--text);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--mono);letter-spacing:.01em}
+.sg-count{font-size:10px;color:var(--text3)}
+.chv{width:11px;height:11px;color:var(--text3);transition:transform .14s;flex-shrink:0}
+.chv.open{transform:rotate(90deg)}
+.t-rows{background:#FAFAF8}
+.trow{display:flex;align-items:center;gap:6px;padding:6px 10px 6px 22px;cursor:pointer;border-top:1px solid var(--border2);user-select:none}
+.trow:hover{background:var(--gray-light)}
+.trow.sel{background:var(--blue-light)}
+.trow-n{font-size:11px;color:var(--text);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--mono)}
+.trow.sel .trow-n{color:var(--blue);font-weight:600}
+.trow-c{font-size:9px;color:var(--text3)}
+/* detail panel */
+.detail-panel{flex:1;background:var(--surface);border:1px solid var(--border);border-left:none;border-radius:0 var(--radius-lg) var(--radius-lg) 0;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.tree-panel.collapsed~.tree-toggle-strip~.detail-panel{border-left:1px solid var(--border);border-radius:var(--radius-lg)}
+.schema-wrap.tree-hidden .detail-panel{border-left:1px solid var(--border);border-radius:var(--radius-lg)}
+.dp-empty{display:flex;align-items:center;justify-content:center;flex:1;flex-direction:column;gap:8px}
+.dp-empty-ico{font-size:28px;opacity:.25}
+.dp-empty-txt{font-size:12px;color:var(--text3)}
+.dp-inner{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.dp-hd{padding:12px 14px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.dp-title{font-size:13px;font-weight:700;font-family:var(--mono);color:var(--text);margin-bottom:2px;letter-spacing:.02em}
+.dp-meta{font-size:11px;color:var(--text3)}
+.dp-hd-btns{display:flex;gap:6px;flex-shrink:0}
+.btn-sm{font-size:11px;padding:4px 10px;border-radius:5px;border:1px solid var(--border);background:var(--surface);color:var(--text2);cursor:pointer;font-family:var(--font);display:flex;align-items:center;gap:4px}
+.btn-sm:hover{background:var(--gray-light);color:var(--text)}
+.btn-sm.danger{background:var(--red-light);color:var(--red);border-color:#FCA5A5}
+.btn-sm.danger:hover{background:#FEE2E2}
+/* JSON toolbar */
+.json-toolbar{padding:8px 13px;border-top:1px solid var(--border2);display:flex;gap:6px;flex-shrink:0}
+.json-btn{font-size:10px;padding:4px 9px;border-radius:5px;border:1px solid var(--border);background:var(--gray-light);color:var(--text2);cursor:pointer;font-family:var(--font);font-weight:600;display:flex;align-items:center;gap:4px;white-space:nowrap}
+.json-btn:hover{background:var(--border);color:var(--text)}
+.json-btn svg{width:11px;height:11px;flex-shrink:0}
+.dp-tabs{display:flex;border-bottom:1px solid var(--border);padding:0 14px;flex-shrink:0}
+.dp-tab{font-size:12px;padding:7px 10px;cursor:pointer;color:var(--text3);border-bottom:2px solid transparent;margin-bottom:-1px;user-select:none;transition:color .12s}
+.dp-tab:hover{color:var(--text)}
+.dp-tab.active{color:var(--blue);border-bottom-color:var(--blue);font-weight:600}
+.dp-body{flex:1;overflow-y:auto;padding:12px 14px}
+.dp-sec{display:none}.dp-sec.active{display:block}
+/* column table */
+.col-tbl{width:100%;border-collapse:collapse;font-size:11px}
+.col-tbl th{text-align:left;font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;padding:0 8px 8px;border-bottom:1px solid var(--border)}
+.col-tbl td{padding:7px 8px;border-bottom:1px solid var(--border2);vertical-align:top;color:var(--text)}
+.col-tbl tr:last-child td{border-bottom:none}
+.col-tbl tr:hover td{background:var(--gray-light)}
+.col-name{font-family:var(--mono);font-size:10px}
+.type-badge{font-size:9px;padding:1px 5px;border-radius:4px;background:var(--green-light);color:var(--green);font-family:var(--mono)}
+.pk-badge{font-size:9px;padding:1px 5px;border-radius:4px;background:var(--amber-light);color:var(--amber);font-weight:700}
+.fk-badge{font-size:9px;padding:1px 5px;border-radius:4px;background:var(--purple-light);color:var(--purple);font-weight:700}
+.lblock{background:var(--gray-light);border-left:3px solid var(--blue);padding:9px 11px;margin-top:5px;font-size:11px;color:var(--text2);line-height:1.65;border-radius:0 5px 5px 0;font-family:var(--mono)}
+.llbl{font-size:9px;font-weight:700;color:var(--blue);margin-bottom:3px;text-transform:uppercase;letter-spacing:.08em;font-family:var(--font)}
+.rel-row{padding:6px 10px;background:var(--gray-light);border-radius:5px;font-family:var(--mono);font-size:10px;color:var(--text)}
+/* detail panel styles continued below */
+/* ── GLOSSARY ── */
+.gl-toolbar{display:flex;gap:8px;margin-bottom:12px;align-items:center}
+.gl-wrap{position:relative;flex:1}
+.gl-wrap svg{position:absolute;left:9px;top:50%;transform:translateY(-50%);width:13px;height:13px;color:#bbb;pointer-events:none}
+.gl-toolbar input{width:100%;padding:7px 10px 7px 30px;font-size:12px;border:1px solid var(--border);border-radius:7px;background:var(--surface);color:var(--text);outline:none;font-family:var(--font)}
+.gl-toolbar input:focus{border-color:var(--blue);background:#fff}
+.gl-toolbar select{padding:7px 10px;font-size:12px;border:1px solid var(--border);border-radius:7px;background:var(--surface);color:var(--text);outline:none;font-family:var(--font)}
+.btn{padding:7px 13px;font-size:12px;cursor:pointer;background:var(--blue);color:#fff;border:none;border-radius:7px;font-weight:600;font-family:var(--font);display:flex;align-items:center;gap:5px;transition:background .12s}
+.btn:hover{background:#124A8A}
+.btn.secondary{background:var(--surface);color:var(--text2);border:1px solid var(--border)}
+.btn.secondary:hover{background:var(--gray-light)}
+/* add-term form */
+.add-form{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;margin-bottom:12px;display:none}
+.add-form.open{display:block}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.form-row{margin-bottom:8px}
+.form-row input,.form-row select,.form-row textarea,.form-grid input,.form-grid select{width:100%;padding:7px 9px;font-size:12px;border:1px solid var(--border);border-radius:6px;background:var(--gray-light);color:var(--text);outline:none;font-family:var(--font)}
+.form-row textarea{min-height:58px;resize:vertical}
+.form-row input:focus,.form-row select:focus,.form-row textarea:focus,.form-grid input:focus,.form-grid select:focus{border-color:var(--blue);background:#fff}
+.form-label{font-size:10px;font-weight:600;color:var(--text2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em}
+.form-acts{display:flex;gap:7px;justify-content:flex-end;margin-top:10px}
+/* glossary table */
+.gl-tbl{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+.gl-tbl thead tr{background:var(--gray-light);border-bottom:1px solid var(--border)}
+.gl-tbl th{text-align:left;font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;padding:9px 12px;white-space:nowrap}
+.gl-tbl tbody tr{border-bottom:1px solid var(--border2);cursor:pointer;transition:background .1s}
+.gl-tbl tbody tr:last-child{border-bottom:none}
+.gl-tbl tbody tr:hover{background:#F5F8FD}
+.gl-tbl td{padding:10px 12px;vertical-align:middle}
+.term-name{font-size:13px;font-weight:700;color:var(--text)}
+.term-def{font-size:11px;color:var(--text3);line-height:1.5;margin-top:2px}
+.links-ct{font-size:11px;font-weight:600;color:var(--text2);text-align:center}
+.upd{font-size:11px;color:#bbb;white-space:nowrap}
+/* detail view */
+.gl-detail{display:none}
+.back-btn{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--blue);cursor:pointer;margin-bottom:14px;font-weight:500}
+.back-btn:hover{text-decoration:underline}
+.back-btn svg{width:13px !important;height:13px !important;flex-shrink:0}
+.dv-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;margin-bottom:10px}
+.dv-term{font-size:18px;font-weight:700;color:var(--text);margin-bottom:8px}
+.dv-tags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px}
+.dv-lbl{font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px}
+.dv-text{font-size:13px;color:var(--text2);line-height:1.65}
+.dv-logic{background:var(--gray-light);border-left:3px solid var(--blue);padding:10px 12px;font-size:11px;color:var(--text2);line-height:1.7;font-family:var(--mono);border-radius:0 5px 5px 0;white-space:pre-wrap}
+.dv-meta-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.dv-meta-item{background:var(--gray-light);border:1px solid var(--border2);border-radius:6px;padding:9px 11px}
+.dv-meta-lbl{font-size:9px;font-weight:700;color:#bbb;text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px}
+.dv-meta-val{font-size:12px;font-weight:600;color:var(--text)}
+.link-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border2);font-size:12px}
+.link-row:last-child{border-bottom:none}
+.lt-tbl{background:var(--blue-light);color:var(--blue);font-size:9px;padding:1px 6px;border-radius:5px;font-weight:600;flex-shrink:0}
+.lt-col{background:var(--teal-light);color:var(--teal);font-size:9px;padding:1px 6px;border-radius:5px;font-weight:600;flex-shrink:0}
+.link-name{font-family:var(--mono);font-size:11px;color:var(--text);flex:1}
+.link-schema{font-size:10px;color:#bbb}
+/* ── SEARCH ── */
+.sr-list{display:flex;flex-direction:column;gap:7px}
+.sri{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:9px 12px;cursor:pointer;transition:border-color .12s}
+.sri:hover{border-color:var(--blue)}
+.sri-type{font-size:9px;text-transform:uppercase;letter-spacing:.09em;color:var(--text3);font-weight:700;margin-bottom:2px}
+.sri-name{font-size:13px;font-weight:700;color:var(--text)}
+.sri-desc{font-size:11px;color:var(--text3)}
+/* ── TAGS ── */
+.tag{display:inline-block;font-size:9px;padding:2px 7px;border-radius:5px;font-weight:600}
+.tag-blue{background:var(--blue-light);color:var(--blue)}
+.tag-green{background:var(--green-light);color:var(--green)}
+.tag-amber{background:var(--amber-light);color:var(--amber)}
+.tag-purple{background:var(--purple-light);color:var(--purple)}
+.tag-red{background:var(--red-light);color:var(--red)}
+.tag-gray{background:var(--gray-light);color:var(--text2)}
+.tag-teal{background:var(--teal-light);color:var(--teal)}
+/* ── ADD TABLE FORM ── */
+.add-table-form{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;margin-bottom:12px;display:none}
+.add-table-form.open{display:block}
+.col-editor{border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:8px}
+.col-editor-hd{background:var(--gray-light);padding:7px 10px;font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;display:flex;align-items:center}
+.col-row{display:grid;grid-template-columns:2fr 1fr 70px 2fr auto;gap:6px;padding:6px 8px;border-top:1px solid var(--border2);align-items:center}
+.col-row input,.col-row select{padding:5px 7px;font-size:11px;border:1px solid var(--border);border-radius:5px;background:var(--gray-light);color:var(--text);outline:none;font-family:var(--font);width:100%}
+.col-row input:focus,.col-row select:focus{border-color:var(--blue);background:#fff}
+.rm-col{background:none;border:none;cursor:pointer;color:var(--text3);font-size:14px;padding:2px 4px;border-radius:4px}
+.rm-col:hover{background:var(--red-light);color:var(--red)}
+.add-col-btn{font-size:11px;padding:5px 10px;border-radius:5px;border:1px dashed var(--border);background:transparent;color:var(--text2);cursor:pointer;font-family:var(--font)}
+.add-col-btn:hover{background:var(--gray-light)}
+/* ── INLINE UNLOCK PANEL ── */
+.unlock-panel{padding:8px 10px;border-top:1px solid var(--border2);flex-shrink:0}
+.unlock-panel.editor-active{background:var(--amber-light);border-top-color:#FCD34D}
+.unlock-row{display:flex;gap:5px;align-items:center}
+.unlock-input{flex:1;padding:5px 8px;font-size:11px;border:1px solid var(--border);border-radius:6px;background:var(--gray-light);color:var(--text);outline:none;font-family:var(--font);min-width:0}
+.unlock-input:focus{border-color:var(--blue);background:#fff}
+.unlock-btn{padding:5px 9px;font-size:11px;font-weight:600;border-radius:6px;border:none;cursor:pointer;font-family:var(--font);background:var(--blue);color:#fff;white-space:nowrap;flex-shrink:0}
+.unlock-btn:hover{background:#124A8A}
+.unlock-btn.lock{background:var(--amber-light);color:var(--amber);border:1px solid #FCD34D}
+.unlock-btn.lock:hover{background:#FCD34D}
+.unlock-status{font-size:10px;margin-top:4px;font-weight:600}
+.unlock-status.viewer{color:var(--text3)}
+.unlock-status.editor{color:var(--amber)}
+.unlock-err{font-size:10px;color:var(--red);margin-top:3px;min-height:13px}
+/* editor-only = marker; editor-hidden = actually hidden */
+.editor-hidden{display:none!important}
+.toast{position:fixed;bottom:20px;right:20px;background:#222;color:#fff;padding:9px 14px;border-radius:8px;font-size:12px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:9999}
+.toast.show{opacity:1}
+/* scrollbar */
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#d4d0c8;border-radius:3px}
+</style>
+</head>
+<body>
+<div class="portal">
+
+<!-- ══ SIDEBAR ══ -->
+<div class="sb">
+  <div class="sb-logo">
+    <div class="sb-icon"><svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5" stroke="white" stroke-width="1.4"/><path d="M4.5 7h5M7 4.5v5" stroke="white" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+    <div><div class="sb-brand">เงินติดล้อ</div><div class="sb-tagline">NTL Data Catalog</div></div>
+  </div>
+  <div class="sb-body">
+    <div class="sb-sec">
+      <div class="sb-lbl">Catalog</div>
+      <div class="ni active" id="nav-schema" onclick="go('schema',this)">
+        <svg viewBox="0 0 16 16" fill="none"><rect x="1" y="3" width="14" height="3" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="1" y="8" width="14" height="3" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="1" y="13" width="8" height="2" rx="1" stroke="currentColor" stroke-width="1.2"/></svg>
+        Data Dictionary<span class="nb nb-b" id="nb-schema">4</span>
+      </div>
+      <div class="ni" id="nav-glossary" onclick="go('glossary',this)">
+        <svg viewBox="0 0 16 16" fill="none"><path d="M3 2h8l2 2v10H3V2z" stroke="currentColor" stroke-width="1.2"/><path d="M5 6h6M5 9h6M5 12h4" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg>
+        Glossary<span class="nb nb-b" id="nb-gl">9</span>
+      </div>
+    </div>
+    <div class="sb-div editor-only" id="sb-admin-div"></div>
+    <div class="sb-sec editor-only" id="sb-admin-sec">
+      <div class="sb-lbl">Admin</div>
+      <div class="ni admin-ni" id="nav-add-table" onclick="go('schema',this,true);openAddTableForm()">
+        <svg viewBox="0 0 16 16" fill="none"><rect x="1" y="3" width="14" height="3" rx="1" stroke="currentColor" stroke-width="1.2"/><path d="M8 9v4M6 11h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        Add Table / Schema
+      </div>
+      <div class="ni admin-ni" id="nav-add-gl" onclick="go('glossary',this,true);openAddGl()">
+        <svg viewBox="0 0 16 16" fill="none"><path d="M3 2h8l2 2v10H3V2z" stroke="currentColor" stroke-width="1.2"/><path d="M8 6v4M6 8h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        Add Glossary Term
+      </div>
+    </div>
+  </div>
+  <div class="json-toolbar editor-only" id="sb-json-toolbar">
+    <button class="json-btn" onclick="saveJSON()" title="Export all data as JSON">
+      <svg viewBox="0 0 16 16" fill="none"><path d="M4 13h8M8 3v7M5 7l3 3 3-3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>Export JSON
+    </button>
+    <button class="json-btn" onclick="document.getElementById('json-upload').click()" title="Import JSON data">
+      <svg viewBox="0 0 16 16" fill="none"><path d="M4 13h8M8 10V3M5 6l3-3 3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>Import JSON
+    </button>
+    <input type="file" id="json-upload" accept=".json" style="display:none" onchange="loadJSON(this)"/>
+  </div>
+  <div class="unlock-panel" id="unlock-panel">
+    <div id="unlock-viewer-row" class="unlock-row">
+      <input type="password" class="unlock-input" id="pw-input" placeholder="Editor password…" onkeydown="if(event.key==='Enter')tryUnlock()"/>
+      <button class="unlock-btn" onclick="tryUnlock()">Unlock</button>
+    </div>
+    <div id="unlock-editor-row" class="unlock-row" style="display:none">
+      <span style="font-size:11px;font-weight:600;color:var(--amber);flex:1">🔓 Editor mode</span>
+      <button class="unlock-btn lock" onclick="lockEditor()">Lock</button>
+    </div>
+    <div class="unlock-err" id="pw-err"></div>
+  </div>
+  <div class="sb-user">
+    <div class="av av-b" id="user-av">DG</div>
+    <div>
+      <div style="font-size:11px;font-weight:600" id="user-name">DG & Data Core Team</div>
+      <div style="font-size:10px;color:var(--text3)" id="user-role">Data Governance</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MAIN ══ -->
+<div class="main">
+  <div class="topbar">
+    <div class="bc" id="bc"><span>Data Dictionary</span></div>
+    <div class="sw">
+      <svg viewBox="0 0 16 16" fill="none"><circle cx="6.5" cy="6.5" r="4" stroke="currentColor" stroke-width="1.3"/><path d="M10 10l3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      <input type="text" id="gs" placeholder="Search tables, columns, schemas, glossary..." oninput="doSearch(this.value)"/>
+    </div>
+    <div style="display:flex;gap:6px;flex-shrink:0;margin-left:8px" class="editor-only" id="topbar-io">
+      <button class="json-btn" onclick="saveJSON()" title="Export all data as JSON">
+        <svg viewBox="0 0 16 16" fill="none"><path d="M8 2v8M5 7l3 3 3-3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 11v2h10v-2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        Export JSON
+      </button>
+      <button class="json-btn" onclick="document.getElementById('file-import').click()" title="Import JSON data file">
+        <svg viewBox="0 0 16 16" fill="none"><path d="M8 10V2M5 5l3-3 3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 11v2h10v-2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        Import JSON
+      </button>
+      <input type="file" id="file-import" accept=".json" style="display:none" onchange="loadJSON(this)"/>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- SEARCH RESULTS -->
+    <div id="p-search" class="page">
+      <div class="ph"><div class="ph-title">Search results</div><div class="ph-sub" id="sr-sub"></div></div>
+      <div class="sr-list" id="sr-list"></div>
+    </div>
+
+    <!-- SCHEMA / DICTIONARY -->
+    <div id="p-schema" class="page active">
+      <div class="stats" id="schema-stats">
+        <div class="stat"><div class="stat-lbl">Schemas</div><div class="stat-val blue" id="stat-schemas">2</div></div>
+        <div class="stat"><div class="stat-lbl">Tables</div><div class="stat-val green" id="stat-tables">4</div></div>
+        <div class="stat"><div class="stat-lbl">Columns</div><div class="stat-val" id="stat-cols">29</div></div>
+        <div class="stat"><div class="stat-lbl">FK Relations</div><div class="stat-val amber" id="stat-fk">5</div></div>
+      </div>
+
+      <!-- Add Table Form -->
+      <div class="add-table-form" id="add-table-form">
+        <div class="ph-title" style="margin-bottom:12px">Add New Table</div>
+        <div class="form-grid">
+          <div>
+            <div class="form-label">Schema</div>
+            <select id="at-schema" style="width:100%;padding:7px 9px;font-size:12px;border:1px solid var(--border);border-radius:6px;background:var(--gray-light);color:var(--text);outline:none;font-family:var(--font)">
+              <option value="">Select or type new schema...</option>
+            </select>
+          </div>
+          <div>
+            <div class="form-label">New Schema Name (if new)</div>
+            <input type="text" id="at-newschema" placeholder="NEW_SCHEMA (leave blank if existing)"/>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-label">Table Name</div>
+          <input type="text" id="at-name" placeholder="TABLE_NAME"/>
+        </div>
+        <div class="form-row">
+          <div class="form-label">Description</div>
+          <input type="text" id="at-desc" placeholder="Short description of the table"/>
+        </div>
+        <div class="form-label" style="margin-bottom:6px">Columns</div>
+        <div class="col-editor">
+          <div class="col-editor-hd">
+            <span style="flex:2">Column Name</span>
+            <span style="flex:1">Type</span>
+            <span style="width:70px">Key</span>
+            <span style="flex:2">Description</span>
+            <span style="width:28px"></span>
+          </div>
+          <div id="col-rows"></div>
+        </div>
+        <button class="add-col-btn" onclick="addColRow()">+ Add column</button>
+        <div class="form-row" style="margin-top:10px">
+          <div class="form-label">Business Logic (optional)</div>
+          <textarea id="at-logic" placeholder="Field: rule or constraint..."></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-label">Relations (optional)</div>
+          <input type="text" id="at-rels" placeholder="CUSTOMER_ID → SCHEMA.TABLE.COL  (separate multiple with |)"/>
+        </div>
+        <div class="form-acts">
+          <button class="btn secondary" onclick="closeAddTableForm()">Cancel</button>
+          <button class="btn" onclick="saveTable()">Save Table</button>
+        </div>
+      </div>
+
+      <div class="schema-wrap" id="schema-wrap">
+        <!-- Tree panel -->
+        <div class="tree-panel" id="tree-panel">
+          <div class="tree-head">
+            <div class="tree-srch" id="tree-srch-wrap">
+              <svg viewBox="0 0 16 16" fill="none"><circle cx="6.5" cy="6.5" r="4" stroke="currentColor" stroke-width="1.3"/><path d="M10 10l3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+              <input type="text" id="sf" placeholder="Filter tables..." oninput="buildTree(this.value.toLowerCase())"/>
+            </div>
+          </div>
+          <div class="tree-body" id="stree"></div>
+        </div>
+
+        <!-- Toggle strip — always visible, sits between tree and detail -->
+        <div class="tree-toggle-strip" id="tree-toggle" onclick="toggleTree()" title="Show / hide table browser">
+          <svg class="tts-chevron" viewBox="0 0 10 10" fill="none">
+            <path d="M6.5 2L3.5 5l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+
+        <!-- Detail panel -->
+        <div class="detail-panel" id="dp">
+          <div class="dp-empty" id="dp-empty">
+            <div class="dp-empty-ico">⬡</div>
+            <div class="dp-empty-txt">Select a table to view its data dictionary</div>
+          </div>
+          <div class="dp-inner" id="dp-inner" style="display:none">
+            <div class="dp-hd">
+              <div>
+                <div class="dp-title" id="dp-title"></div>
+                <div class="dp-meta" id="dp-meta"></div>
+              </div>
+              <div class="dp-hd-btns editor-only" id="dp-edit-btns">
+                <button class="btn-sm" onclick="editSelectedTable()">
+                  <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M11 2l3 3-9 9H2v-3L11 2z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>Edit
+                </button>
+                <button class="btn-sm danger" onclick="deleteSelectedTable()">
+                  <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M6 4V2h4v2M5 4v9h6V4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>Delete
+                </button>
+              </div>
+            </div>
+            <div class="dp-tabs">
+              <div class="dp-tab active" onclick="dptab('cols',this)">Columns</div>
+              <div class="dp-tab" onclick="dptab('logic',this)">Business Logic</div>
+              <div class="dp-tab" onclick="dptab('rels',this)">Relations</div>
+            </div>
+            <div class="dp-body">
+              <div id="dp-cols" class="dp-sec active">
+                <table class="col-tbl">
+                  <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>Description</th></tr></thead>
+                  <tbody id="ctbody"></tbody>
+                </table>
+              </div>
+              <div id="dp-logic" class="dp-sec"><div id="logic-list" style="display:flex;flex-direction:column;gap:10px"></div></div>
+              <div id="dp-rels" class="dp-sec"><div id="rel-list" style="display:flex;flex-direction:column;gap:6px"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GLOSSARY -->
+    <div id="p-glossary" class="page">
+      <!-- LIST VIEW -->
+      <div id="gl-list-view">
+        <div class="ph"><div class="ph-title">Glossary</div><div class="ph-sub">Business terms, definitions, and logic shared across domains</div></div>
+        <div class="gl-toolbar" id="gl-toolbar">
+          <div class="gl-wrap" style="position:relative">
+            <svg viewBox="0 0 16 16" fill="none" style="position:absolute;left:9px;top:50%;transform:translateY(-50%);width:13px;height:13px;color:#bbb;pointer-events:none"><circle cx="6.5" cy="6.5" r="4" stroke="currentColor" stroke-width="1.3"/><path d="M10 10l3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            <input type="text" id="gl-q" placeholder="Search terms, definitions, logic..." oninput="renderGlList()" style="width:100%;padding:7px 10px 7px 30px;font-size:12px;border:1px solid var(--border);border-radius:7px;background:var(--surface);color:var(--text);outline:none;font-family:var(--font)"/>
+          </div>
+          <select id="gl-domain" onchange="renderGlList()" style="padding:7px 10px;font-size:12px;border:1px solid var(--border);border-radius:7px;background:var(--surface);color:var(--text);outline:none;font-family:var(--font)">
+            <option value="">All domains</option>
+          </select>
+          <select id="gl-cat" onchange="renderGlList()" style="padding:7px 10px;font-size:12px;border:1px solid var(--border);border-radius:7px;background:var(--surface);color:var(--text);outline:none;font-family:var(--font)">
+            <option value="">All categories</option>
+            <option>Metric</option><option>Ratio</option><option>Date</option><option>Dimension</option><option>Status</option>
+          </select>
+          <button class="btn editor-only" id="gl-add-btn" onclick="openAddGl()">+ Add term</button>
+        </div>
+
+        <!-- Add Glossary Form -->
+        <div class="add-form" id="gl-form">
+          <div class="ph-title" style="margin-bottom:12px">Add Glossary Term</div>
+          <div class="form-grid">
+            <div>
+              <div class="form-label">Term name *</div>
+              <input type="text" id="glt" placeholder="Term"/>
+            </div>
+            <div>
+              <div class="form-label">Domain</div>
+              <select id="gld" style="width:100%;padding:7px 9px;font-size:12px;border:1px solid var(--border);border-radius:6px;background:var(--gray-light);color:var(--text);outline:none;font-family:var(--font)">
+                <option value="">Select domain...</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-grid">
+            <div>
+              <div class="form-label">Category</div>
+              <select id="glcat" style="width:100%;padding:7px 9px;font-size:12px;border:1px solid var(--border);border-radius:6px;background:var(--gray-light);color:var(--text);outline:none;font-family:var(--font)">
+                <option value="">Category...</option>
+                <option>Metric</option><option>Ratio</option><option>Date</option><option>Dimension</option><option>Status</option>
+              </select>
+            </div>
+            <div>
+              <div class="form-label">Owner</div>
+              <input type="text" id="glowner" placeholder="Owner name"/>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-label">Definition *</div>
+            <textarea id="gldef" placeholder="What does this term mean?"></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-label">Business Logic / Formula</div>
+            <textarea id="gllog" placeholder="Formula, calculation rule, conditions, allowed values..."></textarea>
+          </div>
+          <div class="form-acts">
+            <button class="btn secondary" onclick="closeAddGl()">Cancel</button>
+            <button class="btn" onclick="saveGl()">Save term</button>
+          </div>
+        </div>
+
+        <table class="gl-tbl" id="gl-tbl">
+          <thead>
+            <tr>
+              <th style="width:26%">Term</th>
+              <th>Definition</th>
+              <th style="width:130px">Domain</th>
+              <th style="width:80px;text-align:center">Links</th>
+              <th style="width:95px">Last updated</th>
+              <th style="width:28px"></th>
+            </tr>
+          </thead>
+          <tbody id="gl-body"></tbody>
+        </table>
+      </div>
+
+      <!-- DETAIL VIEW -->
+      <div id="gl-detail-view" style="display:none">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <div class="back-btn" onclick="showGlList()" style="margin-bottom:0">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M10 4l-4 4 4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Back to glossary
+          </div>
+          <button class="btn-sm danger editor-only" id="gl-detail-delete-btn" onclick="deleteCurrentTerm()">
+            <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M6 4V2h4v2M5 4v9h6V4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>Delete term
+          </button>
+        </div>
+        <div class="dv-card">
+          <div class="dv-term" id="dv-term"></div>
+          <div class="dv-tags" id="dv-tags"></div>
+          <div class="dv-lbl">Definition</div>
+          <div class="dv-text" id="dv-def" style="margin-bottom:14px"></div>
+          <div class="dv-lbl" id="dv-logic-lbl">Business logic</div>
+          <div class="dv-logic" id="dv-logic"></div>
+        </div>
+        <div class="dv-meta-grid" id="dv-meta"></div>
+        <div class="dv-card">
+          <div class="dv-lbl" style="margin-bottom:8px">Linked tables &amp; columns</div>
+          <div id="dv-links"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ══════════════════════════════════════
+   DATA STORE
+══════════════════════════════════════ */
+let schemas = [
+  {id:'dp', name:'DISTRIBUTION_PERFORMANCE', color:'#1856A0', owner:'Panij Chintraruck', tables:[
+    {id:'ablp', name:'ALL_BOOKED_LOAN_PERFORMANCE', desc:'Transaction of loan booking and performance', cols:[
+      {n:'ACCOUNT_KEY',t:'VARCHAR',k:'',d:'รหัสสัญญา'},
+      {n:'ACCOUNT_STATUS_KEY',t:'NUMERIC',k:'',d:'สถานะสัญญา 131 = Active'},
+      {n:'ACCOUNT_STATUS_KEY_DESC',t:'VARCHAR',k:'',d:'ความหมายของ ACCOUNT_STATUS_KEY'},
+      {n:'AFS_REQUEST_NO',t:'VARCHAR',k:'FK',d:'รหัสที่ใช้เชื่อมกับ Lead'},
+      {n:'AGREEMENT_NO',t:'VARCHAR',k:'PK/FK',d:'เลขที่สัญญา ใช้เชื่อมกับถัง Port'},
+      {n:'APPROVER_CODE',t:'VARCHAR',k:'',d:'รหัสผู้อนุมัติ'},
+      {n:'APPROVED_DATE',t:'TIMESTAMP',k:'',d:'วันที่อนุมัติ'},
+      {n:'ASSET_IDENTITY_NO',t:'VARCHAR',k:'',d:'เลข Chasis No. ของรถที่นำมาค้ำประกัน'},
+      {n:'AUTO_PREMIUM',t:'NUMERIC',k:'',d:'ยอดจัดประกันรถยนต์ที่ทำพร้อมสินเชื่อ ทั้ง CV และ On top'},
+      {n:'ASSET_TYPE',t:'VARCHAR',k:'',d:'ประเภทของสินทรัพย์ค้ำประกัน'},
+      {n:'BDSM_CHANNEL',t:'VARCHAR',k:'',d:'FLAG สัญญาที่ BDSM ให้ผลงานสาขา'},
+      {n:'BRANCH_BOOKED_AFS_CODE',t:'VARCHAR',k:'',d:'รหัส AFS Branch Code ที่ Book สัญญา'},
+      {n:'BRANCH_BOOKED_CODE',t:'VARCHAR',k:'',d:'รหัสสาขาที่ Book สัญญา'},
+      {n:'CANCEL_DATE',t:'TIMESTAMP',k:'',d:'วันยกเลิกสัญญา'},
+      {n:'CLOSED_DATE',t:'TIMESTAMP',k:'',d:'วันที่ปิดสัญญา'},
+      {n:'CONTRACT_DATE',t:'TIMESTAMP',k:'',d:'วันสร้างสัญญา'},
+      {n:'CUSTOMER_KEY_LOAN',t:'VARCHAR',k:'',d:'รหัสระบุตัวลูกค้า'},
+      {n:'CUSTOMER_TYPE_NTL',t:'VARCHAR',k:'',d:'ประเภทของลูกค้า ลูกค้าใหม่หรือลูกค้าเก่า'},
+      {n:'EFFECTIVE_RATE',t:'NUMERIC',k:'',d:'อัตราดอกเบี้ยแบบลดต้นลดดอก'},
+      {n:'FINANCE_AMT',t:'NUMERIC',k:'',d:'ยอดจัดสินเชื่อตั้งต้น'},
+      {n:'FINANCE_AMT_NET',t:'NUMERIC',k:'',d:'ยอดจัดรถ (หักค่าใช้จ่าย)'},
+      {n:'FIRST_DUE_DATE',t:'TIMESTAMP',k:'',d:'วัน Due Date แรกของสัญญา'},
+      {n:'FLAG_AREEGATOR',t:'VARCHAR',k:'',d:'FLAG สัญญาที่เป็น Agent Areegator'},
+      {n:'FLAT_RATE',t:'NUMERIC',k:'',d:'อัตราดอกเบี้ยคงที่'},
+      {n:'GENDER',t:'VARCHAR',k:'',d:'เพศของลูกค้า'},
+      {n:'LAST_DUE_DATE',t:'TIMESTAMP',k:'',d:'วัน Due Date สุดท้ายของสัญญา'},
+      {n:'LOAN_TYPE',t:'VARCHAR',k:'',d:'ประเภทสินเชื่อ'},
+      {n:'LTV',t:'NUMERIC',k:'',d:'Loan To Value (APPROVE_MONEY / ESTIMATE_MONEY)'},
+      {n:'OUTSTANDING_BALANCE_CURRENT',t:'NUMERIC',k:'',d:'ยอดหนี้คงเหลือ'},
+      {n:'PRODUCT_CODE',t:'VARCHAR',k:'',d:'รหัส Product 10,20=HP และ 55,56,57,65=Loan'},
+      {n:'SUB_LOAN_TYPE',t:'VARCHAR',k:'',d:'ประเภทสินเชื่อ Loan, TLC, Revolving'},
+      {n:'TENOR',t:'NUMERIC',k:'',d:'จำนวนงวดที่ครบกำหนด'},
+      {n:'VEHICLE_AGE',t:'VARCHAR',k:'',d:'อายุรถ'},
+      {n:'VEHICLE_BRAND',t:'VARCHAR',k:'',d:'ยี่ห้อรถ'},
+      {n:'VEHICLE_MODEL',t:'VARCHAR',k:'',d:'Model รถ'},
+      {n:'VEHICLE_REGIS_PROVINCE',t:'VARCHAR',k:'',d:'จังหวัดจดทะเบียนรถ'},
+    ], logic:[], rels:['AGREEMENT_NO → ACCOUNT_PORTFOLIO.PORTFOLIO_DAILY_LOAN.AGREEMENT_NO']},
+
+    {id:'abla', name:'ALL_BOOKED_LOAN_ADDITIONAL', desc:'Additional loan booking attributes', cols:[
+      {n:'ACCOUNT_KEY',t:'VARCHAR',k:'PK',d:'เลขระบุ Transaction เป็น Key สำหรับเชื่อม Table อื่นๆ'},
+      {n:'FLAG_DIGITAL_TYPE',t:'VARCHAR',k:'',d:'เป็นเคสที่ต้นทางมาจากช่องทาง Digital หรือไม่'},
+    ], logic:[], rels:['ACCOUNT_KEY → DISTRIBUTION_PERFORMANCE.ALL_BOOKED_LOAN_PERFORMANCE.ACCOUNT_KEY']},
+
+    {id:'able', name:'ALL_BOOKED_LOAN_EXTENSION', desc:'Extended loan booking details including customer and vehicle info', cols:[
+      {n:'ACCOUNT_KEY',t:'NUMERIC',k:'PK',d:'รหัสสัญญา'},
+      {n:'AGREEMENT_NO',t:'VARCHAR',k:'PK',d:'เลขที่สัญญา ใช้เชื่อมกับถัง Port'},
+      {n:'APPROVE_MONEY',t:'NUMERIC',k:'',d:'ยอดเงินที่อนุมัติ'},
+      {n:'ASSET_IDENTITY_NO',t:'VARCHAR',k:'FK',d:'เลข Chasis No. ของรถที่นำมาค้ำประกัน'},
+      {n:'CHANNEL_CORPORATE',t:'VARCHAR',k:'',d:'Channel แบ่งตามเงื่อนไขทีม Finance'},
+      {n:'CONTACT_PROVINCE_NAME',t:'VARCHAR',k:'',d:'จังหวัด ที่อยู่สำหรับติดต่อ'},
+      {n:'CURRENT_PROVINCE_NAME',t:'VARCHAR',k:'',d:'จังหวัด ของที่อยู่ปัจจุบัน'},
+      {n:'CUSTOMER_KEY',t:'VARCHAR',k:'FK',d:'รหัส ลูกค้า (Citizen)'},
+      {n:'DATETIME_OWNER',t:'TIMESTAMP',k:'',d:'วันครอบครองรถ'},
+      {n:'DATETIME_REGISTER',t:'TIMESTAMP',k:'',d:'วันจดทะเบียนรถ'},
+      {n:'FLAG_TEST_PROGRAM',t:'VARCHAR',k:'',d:'Flag สัญญาที่เป็น Test Program'},
+      {n:'MAILING_PROVINCE_NAME',t:'VARCHAR',k:'',d:'จังหวัด ที่อยู่สำหรับส่งไปรษณีย์'},
+      {n:'NCB_GRADE',t:'VARCHAR',k:'',d:'Group of NCB Grade'},
+      {n:'PROGRAM_NAME',t:'VARCHAR',k:'',d:'ชื่อโปรแกรม (รวม Test Program ด้วย)'},
+      {n:'RATEBOOK',t:'NUMERIC',k:'',d:'Ratebook'},
+      {n:'REGISTER_PROVINCE_NAME',t:'VARCHAR',k:'',d:'จังหวัด ที่อยู่ตามทะเบียนบ้าน'},
+      {n:'REQUEST_MONEY',t:'NUMERIC',k:'',d:'ยอดเงินที่ต้องการกู้'},
+      {n:'TELEPHONE_ID',t:'VARCHAR',k:'FK',d:'ID เบอร์โทรศัพท์ของลูกค้า (สามารถนำไป join กับ Lead & ins ได้)'},
+    ], logic:[], rels:['ACCOUNT_KEY → DISTRIBUTION_PERFORMANCE.ALL_BOOKED_LOAN_PERFORMANCE.ACCOUNT_KEY']},
+
+    {id:'abip', name:'ALL_BOOKED_INS_PERFORMANCE', desc:'Insurance booking performance and sales tracking', cols:[
+      {n:'ACCOUNT_KEY_LOAN_INS',t:'VARCHAR',k:'FK',d:'Account key ของเคสผ่อน จาก ระบบ400'},
+      {n:'ACTUAL_CUSTOMER_PAID_AMOUNT',t:'NUMERIC',k:'',d:'ยอดเบี้ยที่ลูกค้าจ่ายจริงหลังหักส่วนลด'},
+      {n:'AGREEMENT_NO',t:'VARCHAR',k:'FK',d:'Agreement no ของเคสผ่อน จาก ระบบ400'},
+      {n:'BRANCH_BOOKED_AFS_CODE',t:'VARCHAR',k:'FK',d:'Branch booked #Format 4 digit'},
+      {n:'BRANCH_BOOKED_CODE',t:'VARCHAR',k:'FK',d:'Branch booked #Format 2 digit'},
+      {n:'CANCEL_DATE',t:'TIMESTAMP',k:'',d:'วันที่สัญญายกเลิก หรือ ไม่ Active แล้ว'},
+      {n:'CHANNEL_BOOKED',t:'VARCHAR',k:'',d:'ช่องทางที่ Booked'},
+      {n:'COVERAGE_END_DATE',t:'TIMESTAMP',k:'',d:'วันที่กรมธรรม์สิ้นสุดความคุ้มครอง'},
+      {n:'COVERAGE_START_DATE',t:'TIMESTAMP',k:'',d:'วันที่กรมธรรม์เริ่มความคุ้มครอง'},
+      {n:'CUSTOMER_TYPE_CORPORATE',t:'VARCHAR',k:'',d:'ประเภทของลูกค้าในมุมมองของ Corporate'},
+      {n:'DATA_AS_OF',t:'TIMESTAMP',k:'',d:'ข้อมูลอัพเดทถึงวันที่เท่าไหร่'},
+      {n:'DOC_STATUS_DESC_CURRENT',t:'VARCHAR',k:'',d:'คำแปล สถานะของเคส >> Value = Active, Cancel'},
+      {n:'FLAG_BUNDLE_LOAN',t:'VARCHAR',k:'',d:'มีการซื้อคู่กับ Loan ในช่วงวันที่เปิดสัญญาหน้า 7 วันและหลัง 7 วัน'},
+      {n:'INS_COMPANY_NAME',t:'VARCHAR',k:'',d:'ชื่อบริษัทประกัน'},
+      {n:'INSURANCE_TYPE_CORPORATE',t:'VARCHAR',k:'',d:'ประเภทของประกัน ตาม Logic ของ Corporate'},
+      {n:'MOTOR_CLASS',t:'VARCHAR',k:'',d:'ในส่วนของ Motor เป็นการทำประกันชั้นไหน 1,1+,2,2+,3,3+'},
+      {n:'NET_PREMIUM',t:'NUMERIC',k:'',d:'Premium สุทธิ'},
+      {n:'PAYMENT_DATE',t:'TIMESTAMP',k:'',d:'วันที่ชำระเงิน'},
+      {n:'PRODUCT_NAME',t:'VARCHAR',k:'',d:'ชื่อผลิตภัณฑ์'},
+      {n:'RUNNING_IOS_NO',t:'VARCHAR',k:'FK',d:'เลขระบุรายการในระบบ IOS #Format มาจากระบบโดยตรง'},
+      {n:'RUNNING_IOS_NO_UNIQUE',t:'VARCHAR',k:'PK',d:'เลขระบุรายการ เป็น Format ที่ดัดแปลงให้เป็น Unique'},
+      {n:'TOTAL_PREMIUM',t:'NUMERIC',k:'',d:'จำนวนเบี้ย'},
+      {n:'TRANSACTION_DATE',t:'TIMESTAMP',k:'',d:'วันที่เกิด Transaction การขาย'},
+      {n:'UNIT',t:'NUMERIC',k:'',d:'ใช้แทนการนับจำนวนเคส'},
+    ], logic:[], rels:['ACCOUNT_KEY_LOAN_INS → DISTRIBUTION_PERFORMANCE.ALL_BOOKED_LOAN_PERFORMANCE.ACCOUNT_KEY']},
+
+    {id:'abie', name:'ALL_BOOKED_INS_EXTENSION', desc:'Extended insurance booking details', cols:[
+      {n:'ACCOUNT_KEY_LOAN_INS',t:'NUMERIC',k:'FK',d:'Account key ของเคสผ่อน จาก ระบบ400'},
+      {n:'AGREEMENT_NO_INS',t:'VARCHAR',k:'FK',d:'Agreement no ของเคสผ่อน จาก ระบบ400'},
+      {n:'BILL_CODE',t:'VARCHAR',k:'',d:'เลขที่ Bill จากฝั่ง Operation เพื่อบ่งบอกสถานะเคส'},
+      {n:'BRANCH_BOOKED_AFS_CODE',t:'VARCHAR',k:'FK',d:'Branch booked #Format 4 digit'},
+      {n:'BRANCH_BOOKED_CODE',t:'VARCHAR',k:'FK',d:'Branch booked #Format 2 digit'},
+      {n:'BRANCH_BOOKED_AGE_VINTAGE',t:'NUMERIC',k:'',d:'รายการ Booked นี้เกิดขึ้นเมื่อ Branch นี้เปิดไปแล้วกี่เดือน'},
+      {n:'BRANCH_BOOKED_NAME',t:'VARCHAR',k:'FK',d:'ชื่อสาขาที่ Booked'},
+      {n:'BRANCH_BOOKED_PROVINCE',t:'VARCHAR',k:'',d:'Branch booked อยู่จังหวัดอะไร'},
+      {n:'CLOSED_DATE_AS400',t:'TIMESTAMP',k:'',d:'วันที่เวนคืนสำเร็จ Outstanding balance ในระบบ = 0'},
+      {n:'COMMISSION_AMOUNT',t:'NUMERIC',k:'',d:'ค่าคอมมิชชั่นจากรายการขายนี้'},
+      {n:'CUSTOMER_AGE',t:'NUMERIC',k:'',d:'ณ Transaction นั้นๆ ลูกค้าอายุเท่าไหร่'},
+      {n:'CUSTOMER_GENDER',t:'VARCHAR',k:'',d:'เพศของลูกค้า'},
+      {n:'CUSTOMER_KEY',t:'VARCHAR',k:'',d:'Key ระบุตัวตนของลูกค้า #Format Dummy'},
+      {n:'CUSTOMER_TYPE',t:'VARCHAR',k:'',d:'ประเภทของลูกค้า นับจากว่าเป็นการซื้อผลิตภัณฑ์ NTL ครั้งแรกหรือไม่'},
+      {n:'DATA_AS_OF',t:'TIMESTAMP',k:'',d:'ข้อมูลอัพเดทถึงวันที่เท่าไหร่'},
+      {n:'FLAG_RENEW',t:'VARCHAR',k:'',d:'เป็นเคสต่ออายุหรือไม่'},
+      {n:'FLAG_SURRENDER',t:'VARCHAR',k:'',d:'มีการ Surrender หรือไม่'},
+      {n:'OUTSTANDING_BALANCE',t:'NUMERIC',k:'',d:'ยอดหนี้คงเหลือ ณ วันที่ Run data'},
+      {n:'PAYMENT_DATE',t:'TIMESTAMP',k:'',d:'วันที่ลูกค้าทำการจ่ายเงิน'},
+      {n:'RUNNING_IOS_NO',t:'VARCHAR',k:'FK',d:'เลขระบุรายการในระบบ IOS'},
+      {n:'TOTAL_PREMIUM',t:'NUMERIC',k:'',d:'ค่าเบี้ยประกัน (รวมภาษีอากร)'},
+      {n:'TRANSACTION_DATE',t:'TIMESTAMP',k:'',d:'วันที่เกิด Transaction date'},
+      {n:'VEHICLE_AGE',t:'NUMERIC',k:'',d:'อายุรถ ณ Transaction date'},
+      {n:'WORK_ID',t:'NUMERIC',k:'PK',d:'WORK_ID'},
+    ], logic:[], rels:['ACCOUNT_KEY_LOAN_INS → DISTRIBUTION_PERFORMANCE.ALL_BOOKED_LOAN_PERFORMANCE.ACCOUNT_KEY']},
+
+    {id:'abia', name:'ALL_BOOKED_INS_ADDITIONAL', desc:'Additional insurance booking flags and payment data', cols:[
+      {n:'FLAG_AREEGATOR',t:'VARCHAR',k:'',d:'เป็นเคสที่นับว่าเป็นของ Areegator หรือไม่'},
+      {n:'FLAG_DIGITAL_TYPE',t:'VARCHAR',k:'',d:'เป็นเคสที่ต้นทางมาจากช่องทาง Digital หรือไม่'},
+      {n:'FLAG_RENEW_TYPE',t:'VARCHAR',k:'',d:'กรณีที่เป็นเคส Renew เป็นการต่อแบบใด APP STP, APP NONSTP, NON APP'},
+      {n:'PAYMENT_DATE',t:'TIMESTAMP',k:'',d:'วันที่ลูกค้าทำการจ่ายเงิน'},
+      {n:'RUNNING_IOS_NO',t:'VARCHAR',k:'FK',d:'เลข Running no เป็น Key สำหรับเชื่อม Table อื่นๆ'},
+    ], logic:[], rels:['RUNNING_IOS_NO → DISTRIBUTION_PERFORMANCE.ALL_BOOKED_INS_PERFORMANCE.RUNNING_IOS_NO']},
+
+    {id:'ull', name:'UNIVERSE_LEAD_LOAN', desc:'Lead funnel universe for loan products — tracks every lead from creation through contract', cols:[
+      {n:'OPPID',t:'CHAR',k:'PK',d:'Unique Key — ระบบ Lead จะมีเลข OPPID / Direct จะเป็น Request No / K2 เลขของ K2'},
+      {n:'PRE_REQUEST_NO',t:'CHAR',k:'FK',d:'PRE_REQUEST_NO'},
+      {n:'AFS_REQUEST_NO',t:'CHAR',k:'',d:'เลข Request No ของ AS400 และเป็นรหัสที่ใช้เชื่อมกับ All Booked Loan Performance'},
+      {n:'AFS_BRANCH_CODE_CREATE_LEAD',t:'CHAR',k:'',d:'(รหัสสาขา 4 digits) สาขาที่สร้าง Lead'},
+      {n:'AFS_BRANCH_CODE_CURRENT',t:'CHAR',k:'',d:'(รหัสสาขา 4 digits) สาขาปัจจุบันที่ถือ Lead นี้อยู่'},
+      {n:'AFS_BRANCH_CODE_LAST_IN_MONTH',t:'CHAR',k:'',d:'(รหัสสาขา 4 digits) สาขาสุดท้ายในแต่ละเดือน'},
+      {n:'AFS_BRANCH_CODE_FIRST',t:'CHAR',k:'',d:'(รหัสสาขา 4 digits) สาขาแรกที่ได้รับ Lead'},
+      {n:'AFS_BRANCH_CODE_PT_BDSM',t:'CHAR',k:'',d:'(รหัสสาขา 4 digits) สาขาที่ใช้สำหรับคำนวณ PT ของ BDSM'},
+      {n:'APPRAISAL_PRICE_LEAD',t:'FLOAT',k:'',d:'ราคาประเมิน'},
+      {n:'ASSET_SUB_TYPE',t:'CHAR',k:'',d:'ประเภทของ Asset เช่น Sedan / Passenger / Pick-up / Van / Truck / Tractor / Bus / Motorcycle'},
+      {n:'B_SCORE',t:'CHAR',k:'',d:'B Score B00-B05 มีแค่ในระบบ Lead เท่านั้น'},
+      {n:'CANCEL_REASON',t:'CHAR',k:'',d:'เหตุผลการยกเลิก'},
+      {n:'CHANNEL_GROUP_BDSM',t:'CHAR',k:'',d:'Channel Group ตามเงื่อนไขของฝั่ง BDSM'},
+      {n:'CHANNEL_ORIGINAL',t:'CHAR',k:'',d:'Channel จากระบบ ไม่มีการแก้ไข'},
+      {n:'CITIZEN_RUNNING_ID',t:'CHAR',k:'',d:'CITIZEN_RUNNING_ID'},
+      {n:'CONTENT_ID',t:'NUMERIC',k:'',d:'CONTENT_ID'},
+      {n:'CREATE_TEAM_CODE',t:'CHAR',k:'',d:'ทีมที่สร้าง Lead'},
+      {n:'CREATE_BY',t:'CHAR',k:'',d:'รหัสของคนที่สร้าง Lead'},
+      {n:'DATASOURCE',t:'CHAR',k:'',d:'Datasource ประกอบด้วย Lead / K2 / Direct'},
+      {n:'DATE_1001',t:'TIMESTAMP',k:'',d:'วันที่ Key 1001'},
+      {n:'DATE_1643',t:'TIMESTAMP',k:'',d:'วันที่ Key 1643'},
+      {n:'DATE_1017',t:'TIMESTAMP',k:'',d:'วันที่ Key 1017'},
+      {n:'DATE_APPOINT',t:'TIMESTAMP',k:'',d:'วันที่นัดหมายลูกค้า'},
+      {n:'DATE_APPROVE',t:'TIMESTAMP',k:'',d:'วันที่อนุมัติ'},
+      {n:'DATE_CANCEL',t:'TIMESTAMP',k:'',d:'วันที่ยกเลิก'},
+      {n:'DATE_CHECK_NCB',t:'TIMESTAMP',k:'',d:'วันที่ check NCB grade'},
+      {n:'DATE_CCS',t:'TIMESTAMP',k:'',d:'วันที่ check CCS'},
+      {n:'DATE_CONTRACT',t:'TIMESTAMP',k:'',d:'วันที่ทำสัญญา'},
+      {n:'DATE_CREATE_REQUEST_DETAIL_ID',t:'TIMESTAMP',k:'',d:'วันที่สร้าง Request Detail ID'},
+      {n:'DATE_DELETE',t:'TIMESTAMP',k:'',d:'วันที่ลบ Lead'},
+      {n:'DATE_FEED',t:'TIMESTAMP',k:'',d:'วันที่ Feed'},
+      {n:'DATE_FOLLOW',t:'TIMESTAMP',k:'',d:'วันที่ติดตาม Lead'},
+      {n:'DATE_FULL',t:'TIMESTAMP',k:'',d:'วันที่ Key Full'},
+      {n:'DATE_GET_RESULT_NCB',t:'TIMESTAMP',k:'',d:'วันที่ Grade NCB ออก'},
+      {n:'DATE_PRE',t:'TIMESTAMP',k:'',d:'วันที่ Key Pre'},
+      {n:'DATE_NEW_LEAD',t:'TIMESTAMP',k:'',d:'วันที่สร้าง Lead'},
+      {n:'DATE_SEND_BR_FIRST_TIME_PT_BDSM',t:'TIMESTAMP',k:'',d:'วันที่ส่งสาขาแรก เพื่อใช้คำนวณ %PT ของ BDSM'},
+      {n:'DIGITAL_GROUP_PROFILE',t:'CHAR',k:'',d:'Marketing Channel ของ Lead นั้นๆ มีเฉพาะ Datasource Lead'},
+      {n:'F_PT_BDSM',t:'CHAR',k:'',d:'เงื่อนไขการ Flag สถานะ Lead เพื่อคำนวณ %PT ณ เดือนที่สร้าง Lead (แบบ Vintage)'},
+      {n:'F_PT_BDSM_IN_MONTH',t:'CHAR',k:'',d:'เงื่อนไขการ Flag สถานะ Lead เพื่อคำนวณ %PT ณ สิ้นเดือน (แบบ In-month)'},
+      {n:'FLAG_1001',t:'FLOAT',k:'',d:'Flag Lead ที่มาถึง Status Key 1001'},
+      {n:'FLAG_1001_IN_MONTH_BDSM',t:'FLOAT',k:'',d:'Flag Lead ที่มาถึง Status Key 1001 ภายในเดือน สำหรับใช้คำนวณ %PT BDSM'},
+      {n:'FLAG_1017',t:'FLOAT',k:'',d:'Flag Lead ที่มาถึง Status Key 1017'},
+      {n:'FLAG_1017_IN_MONTH_BDSM',t:'FLOAT',k:'',d:'Flag Lead ที่มาถึง Status Key 1017 ภายในเดือน สำหรับใช้คำนวณ %PT BDSM'},
+      {n:'FLAG_1643',t:'FLOAT',k:'',d:'Flag Lead ที่มาถึง Status Key 1643'},
+      {n:'FLAG_1643_IN_MONTH_BDSM',t:'FLOAT',k:'',d:'Flag Lead ที่มาถึง Status Key 1643 ภายในเดือน สำหรับใช้คำนวณ %PT BDSM'},
+      {n:'FLAG_APPROVE',t:'FLOAT',k:'',d:'Flag Lead ที่มาถึง Status Approve'},
+      {n:'FLAG_APPROVE_IN_MONTH_BDSM',t:'FLOAT',k:'',d:'Flag Lead ที่มาถึง Status Approve ภายในเดือน สำหรับใช้คำนวณ %PT BDSM'},
+      {n:'FLAG_CANCEL',t:'FLOAT',k:'',d:'Flag Lead ที่มาถึง Status Cancel'},
+      {n:'FLAG_CANCEL_IN_MONTH_BDSM',t:'FLOAT',k:'',d:'Flag Lead ที่มาถึง Status Cancel ภายในเดือน'},
+      {n:'FLAG_CCS',t:'FLOAT',k:'',d:'Flag Lead ที่มาถึง Status CCS'},
+      {n:'FLAG_CCS_IN_MONTH_BDSM',t:'FLOAT',k:'',d:'Flag Lead ที่มาถึง Status CCS ภายในเดือน'},
+      {n:'FLAG_CHECK_NCB',t:'FLOAT',k:'',d:'Flag Lead ที่มาถึง Status Check NCB'},
+      {n:'FLAG_CHECK_NCB_IN_MONTH_BDSM',t:'FLOAT',k:'',d:'Flag Lead ที่มาถึง Status Check NCB ภายในเดือน'},
+      {n:'FLAG_CONTRACT',t:'FLOAT',k:'',d:'Flag Lead ที่มาถึง Status Contract'},
+      {n:'FLAG_CONTRACT_IN_MONTH_BDSM',t:'FLOAT',k:'',d:'Flag Lead ที่มาถึง Status Contract ภายในเดือน'},
+      {n:'FLAG_DELETE_IN_MONTH_BDSM',t:'FLOAT',k:'',d:'Flag Lead ที่ Delete ภายในเดือน สำหรับใช้คำนวณ %PT BDSM'},
+      {n:'FLAG_FEED',t:'FLOAT',k:'',d:'Flag Lead ที่มาถึง Status Feed'},
+      {n:'FLAG_FEED_IN_MONTH_BDSM',t:'FLOAT',k:'',d:'Flag Lead ที่มาถึง Status Feed ภายในเดือน'},
+      {n:'FLAG_FOLLOW',t:'FLOAT',k:'',d:'Flag Lead ที่มาถึง Status Follow'},
+      {n:'FLAG_FOLLOW_IN_MONTH_BDSM',t:'FLOAT',k:'',d:'Flag Lead ที่มาถึง Status Follow ภายในเดือน'},
+      {n:'FLAG_FULL',t:'FLOAT',k:'',d:'Flag Lead ที่มาถึง Status Full'},
+      {n:'FLAG_FULL_IN_MONTH_BDSM',t:'FLOAT',k:'',d:'Flag Lead ที่มาถึง Status Full ภายในเดือน'},
+      {n:'FLAG_GET_RESULT_NCB',t:'FLOAT',k:'',d:'Flag Lead ที่มี Result NCB Grade'},
+      {n:'FLAG_NEW_LEAD',t:'FLOAT',k:'',d:'Flag Lead New'},
+      {n:'FLAG_ONLINE',t:'FLOAT',k:'',d:'สอดคล้องกับ Digital Group Profile ถ้า Digital Group มีค่า แล้ว Flag Online = 1'},
+      {n:'FLAG_PRE',t:'FLOAT',k:'',d:'Flag Lead ที่มาถึง Status Pre'},
+      {n:'FLAG_PRE_IN_MONTH_BDSM',t:'FLOAT',k:'',d:'Flag Lead ที่มาถึง Status Pre ภายในเดือน'},
+      {n:'FLAG_RESULT_NCB_IN_MONTH_BDSM',t:'FLOAT',k:'',d:'Flag Lead ที่มี Result NCB Grade ภายในเดือน'},
+      {n:'FLAG_TOPUP',t:'CHAR',k:'',d:'Flag ประเภท Lead ว่าเป็น TopUp / NoTopUp'},
+      {n:'FOLLOW_STATUS',t:'CHAR',k:'',d:'สถานะการติดตาม Lead'},
+      {n:'INTEREST',t:'FLOAT',k:'',d:'อัตราดอกเบี้ย'},
+      {n:'INTEREST_YEAR',t:'FLOAT',k:'',d:'อัตราดอกเบี้ยรายปี'},
+      {n:'LAST_STATUS',t:'CHAR',k:'',d:'สถานะสุดท้ายของ Lead ว่าอยู่สถานะใด'},
+      {n:'LAST_STATUS_BEFORE_CANCEL',t:'CHAR',k:'',d:'สถานะสุดท้ายของ Lead ก่อน Lead Cancel'},
+      {n:'MARKETING_CHANNEL',t:'CHAR',k:'',d:'ช่องทางที่ได้ lead เช่น Facebook, Line, NTL App'},
+      {n:'NCB_GRADE',t:'CHAR',k:'',d:'NCB Grade'},
+      {n:'RATEBOOK_LEAD',t:'FLOAT',k:'',d:'Ratebook Lead'},
+      {n:'REFERRAL_ID',t:'CHAR',k:'',d:'รหัสของคน Refer Lead'},
+      {n:'REFERRAL_NAME',t:'CHAR',k:'',d:'ชื่อของคน Refer Lead'},
+      {n:'REQUEST_AMOUNT',t:'NUMERIC',k:'',d:'ยอดที่ลูกค้าต้องการ'},
+      {n:'TARGET',t:'CHAR',k:'',d:'Target เช่น เป้า D / Q / R / E'},
+      {n:'TELEPHONE_ID',t:'CHAR',k:'',d:'Telephone ID'},
+      {n:'TFS_FINANCE_AMOUNT',t:'NUMERIC',k:'',d:'Finance Amount จากระบบ TFS (ยอดเบิกถอน ณ วันทำสัญญา รวมเบี้ยประกัน)'},
+      {n:'TOPIC',t:'CHAR',k:'',d:'Topic Lead'},
+      {n:'VEHICLE_MODEL',t:'CHAR',k:'',d:'Model รถ'},
+      {n:'VEHICLE_REGIS_YEAR',t:'CHAR',k:'',d:'ปีจดทะเบียนรถ'},
+    ], logic:[
+      {f:'DATASOURCE',r:'Lead = มาจากระบบ Lead / K2 = มาจากระบบ K2 / Direct = Direct walk-in'},
+      {f:'FLAG_* columns',r:'1 = Lead เคยผ่านสถานะนั้น, 0 = ยังไม่ผ่าน\nFLAG_*_IN_MONTH_BDSM ใช้คู่กับ AFS_BRANCH_CODE_PT_BDSM เพื่อคำนวณ %PT รายเดือน'},
+    ], rels:['AFS_REQUEST_NO → DISTRIBUTION_PERFORMANCE.ALL_BOOKED_LOAN_PERFORMANCE.AFS_REQUEST_NO']},
+
+    {id:'uli', name:'UNIVERSE_LEAN_INS', desc:'Lead funnel universe for insurance products — tracks OppID/WorkID from creation through booking', cols:[
+      {n:'OPP_ID',t:'VARCHAR',k:'PK',d:'OPP_ID'},
+      {n:'RUNNING_NO',t:'VARCHAR',k:'PK',d:'เลข Running no ในกรณีที่ปิดเคสได้ สำหรับเป็น Key เพื่อไปเชื่อมกับถัง Booked'},
+      {n:'WORK_ID',t:'NUMERIC',k:'PK',d:'WORK_ID'},
+      {n:'WORKOPP_KEY',t:'VARCHAR',k:'PK',d:'Key โดยการนำ WorkID และ OppID มาประกอบกัน'},
+      {n:'LEAD_CODE',t:'VARCHAR',k:'FK',d:'LEAD_CODE'},
+      {n:'QUOTATION_NO',t:'VARCHAR',k:'FK',d:'QUOTATION_NO'},
+      {n:'QV_NO',t:'VARCHAR',k:'FK',d:'QV_NO'},
+      {n:'REQUEST_NO',t:'VARCHAR',k:'FK',d:'REQUEST NO'},
+      {n:'AFS_BRANCH_CODE_CREATE',t:'VARCHAR',k:'FK',d:'สาขาที่สร้าง WorkID/OppID — Format 4 Digit'},
+      {n:'AFS_BRANCH_CODE_CURRENT',t:'VARCHAR',k:'FK',d:'สาขาปัจจุบันของ Lead — Format 4 Digit'},
+      {n:'BRANCH_CODE_CREATE_LEAD',t:'VARCHAR',k:'FK',d:'สาขาที่สร้าง Lead'},
+      {n:'BRANCH_CODE_FIRST',t:'VARCHAR',k:'FK',d:'สาขาที่ได้รับ Lead เป็นสาขาแรก'},
+      {n:'BRANCH_CODE_CURRENT',t:'VARCHAR',k:'FK',d:'สาขาปัจจุบันของ Lead — Format 2 Digit'},
+      {n:'BRANCH_SALES',t:'VARCHAR',k:'FK',d:'สาขาที่ปิดการขายได้'},
+      {n:'1-NEW',t:'NUMERIC',k:'',d:'ใช้แทนการนับ Unit'},
+      {n:'1-CANCEL',t:'NUMERIC',k:'',d:'Flag เพื่อดูว่ามีการ Cancel หรือไม่ หาก Cancel แล้ว = 1'},
+      {n:'1-CANCEL_IN_MONTH',t:'NUMERIC',k:'',d:'Flag Cancel in-month — Cancel แล้ว = 1'},
+      {n:'1-DELETE',t:'NUMERIC',k:'',d:'Flag Delete — Delete แล้ว = 1'},
+      {n:'1-DELETE_IN_MONTH',t:'NUMERIC',k:'',d:'Flag Delete in-month — Delete แล้ว = 1'},
+      {n:'1-FOLLOW',t:'NUMERIC',k:'',d:'Flag Follow — Follow แล้ว = 1'},
+      {n:'1-FOLLOW_IN_MONTH',t:'NUMERIC',k:'',d:'Flag Follow in-month — Follow แล้ว = 1'},
+      {n:'1-PREVERIFY',t:'NUMERIC',k:'',d:'Flag Preverify — Preverify แล้ว = 1'},
+      {n:'1-PREVERIFY_IN_MONTH',t:'NUMERIC',k:'',d:'Flag Preverify in-month — Preverify แล้ว = 1'},
+      {n:'1-PRINT',t:'NUMERIC',k:'',d:'Flag Booked — Booked แล้ว = 1'},
+      {n:'1-PRINT_IN_MONTH',t:'NUMERIC',k:'',d:'Flag Booked in-month — Booked แล้ว = 1'},
+      {n:'1-QUOTE',t:'NUMERIC',k:'',d:'Flag Quote — Quote แล้ว = 1'},
+      {n:'1-QUOTE_IN_MONTH',t:'NUMERIC',k:'',d:'Flag Quote in-month — Quote แล้ว = 1'},
+      {n:'1-SALES',t:'NUMERIC',k:'',d:'Flag Sales — Sales แล้ว = 1'},
+      {n:'1-SALE_IN_MONTH',t:'NUMERIC',k:'',d:'Flag Sales in-month — Sales แล้ว = 1'},
+      {n:'CANCEL_BY',t:'VARCHAR',k:'',d:'รหัสพนักงานของคนที่ยกเลิก OppId'},
+      {n:'CANCEL_BY_GROUP',t:'VARCHAR',k:'',d:'รายการนี้ถูกยกเลิกด้วย ระบบหรือพนักงาน'},
+      {n:'CANCEL_DATE',t:'TIMESTAMP',k:'',d:'วันที่ยกเลิก WorkID/OppID'},
+      {n:'CANCEL_REASON_DESC',t:'VARCHAR',k:'',d:'เหตุผลในการยกเลิก Lead'},
+      {n:'CANCEL_TO_FUTURE',t:'VARCHAR',k:'',d:'มีการยกเลิก Lead และไปอยู่ในถัง Lead future หรือไม่'},
+      {n:'CAR_BRAND',t:'VARCHAR',k:'',d:'Brand ของรถ'},
+      {n:'CAR_CHASSIS',t:'VARCHAR',k:'',d:'เลขตัวถังของรถ'},
+      {n:'CAR_MODEL',t:'VARCHAR',k:'',d:'Model ของรถ'},
+      {n:'CAR_TYPE',t:'VARCHAR',k:'',d:'ประเภทรถ'},
+      {n:'CAR_YEAR',t:'NUMERIC',k:'',d:'ปีจดทะเบียนของรถ'},
+      {n:'CHANNEL_BDSM',t:'VARCHAR',k:'',d:'Channel ที่มีการจัดกลุ่มโดย BDSM'},
+      {n:'CHANNEL_SYSTEM',t:'VARCHAR',k:'',d:'Channel ต้นทางที่มาจากระบบ'},
+      {n:'CREATE_BY_GROUP',t:'VARCHAR',k:'',d:'พนักงานที่สร้าง WorkID/OppID แบบจัดเป็นกลุ่ม'},
+      {n:'CREATE_TEAM_CODE',t:'VARCHAR',k:'',d:'Team ที่เป็นคนสร้าง OppID — Format Code'},
+      {n:'CREATE_TEAM_CODE_DESC',t:'VARCHAR',k:'',d:'Team ที่เป็นคนสร้าง OppID — Format Description'},
+      {n:'CREATE_USER_BY',t:'VARCHAR',k:'',d:'พนักงานที่สร้าง WorkID/OppID'},
+      {n:'DATE_SEND_BRANCH_FIRST_TIME',t:'TIMESTAMP',k:'',d:'วันที่สาขาได้รับ Lead ครั้งแรกในกรณีที่ Lead มาจากช่องทางอื่นที่ไม่ใช่สาขา'},
+      {n:'DELETE_DATE',t:'TIMESTAMP',k:'',d:'วันที่ DELETE'},
+      {n:'DIGITAL_DATA_TYPE',t:'VARCHAR',k:'',d:'เป็น Oppid ที่มาจาก Mapping digital type จากทีม MIS'},
+      {n:'DOCUMENT_STATUS_CODE',t:'NUMERIC',k:'',d:'สถานะของเคส ว่ายกเลิกไปแล้วหรือยัง Active อยู่'},
+      {n:'F_FUTURE_IN_MONTH',t:'VARCHAR',k:'',d:'ณ สิ้นเดือนเดียวกับเดือนที่สร้าง WorkID/OppID ถูกยกเลิกไปอยู่ถัง Lead future หรือไม่'},
+      {n:'F_PAY_CV_IN_MONTH',t:'VARCHAR',k:'',d:'ณ สิ้นเดือนเดียวกับเดือนที่สร้าง เป็นการจ่ายแบบ CV หรือไม่'},
+      {n:'F_PT_BDSM',t:'VARCHAR',k:'',d:'สำหรับ BDSM รายการนี้นับใน %PT หรือไม่'},
+      {n:'F_PT_IN_MONTH_BDSM',t:'VARCHAR',k:'',d:'สำหรับ BDSM รายการนี้นับใน %PT in-month หรือไม่'},
+      {n:'FIRST_QUOTE_DATE',t:'TIMESTAMP',k:'',d:'วันที่ Quote ครั้งแรก'},
+      {n:'FOLLOW_DATE',t:'TIMESTAMP',k:'',d:'วันที่ Follow ครั้งแรก'},
+      {n:'FOLLOW_TO_QUOTE_MINS',t:'NUMERIC',k:'',d:'ระยะเวลา (นาที) จากสถานะ Follow ไปยังสถานะ Quote'},
+      {n:'LAST_ACTIVITY_DATE',t:'TIMESTAMP',k:'',d:'วันที่ที่มีการอัพเดท WorkID/OppID นี้ล่าสุด'},
+      {n:'LAST_BRANCH_IN_MONTH',t:'VARCHAR',k:'',d:'สาขาสุดท้ายที่ Lead อยู่ ณ สิ้นเดือน'},
+      {n:'LAST_STATUS_IN_MONTH',t:'VARCHAR',k:'',d:'สถานะท้ายสุด ณ สิ้นเดือน'},
+      {n:'LEAD_CAMPAIGN_BDSM',t:'VARCHAR',k:'',d:'Flag เพื่อระบุว่าเป็น Lead ที่มาจากแคมเปญที่อัพโหลดโดยสำนักงานใหญ่หรือไม่'},
+      {n:'LEAD_CANCEL_DATE',t:'TIMESTAMP',k:'',d:'วันที่ Cancel Lead'},
+      {n:'LEAD_CREATE_DATE',t:'TIMESTAMP',k:'',d:'วันที่สร้าง Lead code'},
+      {n:'LEAD_EXPIRE_DATE',t:'TIMESTAMP',k:'',d:'วันที่ Lead หมดอายุในระบบ SAS'},
+      {n:'LEAD_FUTURE',t:'VARCHAR',k:'',d:'เป็น Lead future หรือไม่ ทั้งขาเข้าและขาออก'},
+      {n:'LEAD_LATEST_STATUS',t:'VARCHAR',k:'',d:'สถานะล่าสุดของ Lead'},
+      {n:'LEAD_REMARK',t:'VARCHAR',k:'',d:'Remark ของ Lead'},
+      {n:'LEAD_SYSTEM_TYPE',t:'VARCHAR',k:'',d:'เป็น Lead ที่มาจากระบบไหน IOS หรือ OPP'},
+      {n:'LEAD_TYPE',t:'VARCHAR',k:'',d:'ประเภทของ Lead ว่าเป็นต่ออายุหรือไม่'},
+      {n:'LEAD_TYPE_BDSM',t:'VARCHAR',k:'',d:'ประเภทของ Lead ตาม Logic ของ BDSM'},
+      {n:'MARKETING_CHANNEL',t:'VARCHAR',k:'',d:'ช่องทาง Marketing'},
+      {n:'MOTOR_CLASS',t:'NUMERIC',k:'',d:'กรณีที่ปิดการขายได้ เป็นกรมธรรม์ชั้นไหน'},
+      {n:'NEW_DATE',t:'TIMESTAMP',k:'',d:'วันที่สร้าง WorkID/OppID'},
+      {n:'NEW_TO_FOLLOW_MINS',t:'NUMERIC',k:'',d:'ระยะเวลา (นาที) จากสถานะ New ไปยังสถานะ Follow'},
+      {n:'NEW_TO_PREVERIFY_MINS',t:'NUMERIC',k:'',d:'ระยะเวลา (นาที) จากสถานะ New ไปยัง Preverify'},
+      {n:'NEXT_SCHEDULE_DATE',t:'TIMESTAMP',k:'',d:'วันที่นัดการติดตามครั้งถัดไป'},
+      {n:'ORDER_REFERENCE_NO',t:'VARCHAR',k:'',d:'ORDER_REFERENCE_NO'},
+      {n:'PAY_TYPE_DESC',t:'VARCHAR',k:'',d:'ประเภทการจ่ายเงินสำหรับเคสที่ปิดได้แล้ว'},
+      {n:'PREVERIFY_DATE',t:'TIMESTAMP',k:'',d:'วันที่ Preverify'},
+      {n:'PREVERIFY_TO_SALE_MINS',t:'NUMERIC',k:'',d:'ระยะเวลา (นาที) จากสถานะ Preverify ไปยังสถานะ Sales'},
+      {n:'PREVIOUS_POLICY_EXPIRE_DATE',t:'TIMESTAMP',k:'',d:'กรมธรรม์ก่อนหน้าเมื่อปีที่แล้วหมดอายุวันที่เท่าไหร่ กรณีที่เป็นประกัน Renew'},
+      {n:'PRINT_DATE',t:'TIMESTAMP',k:'',d:'วันที่ Print'},
+      {n:'PRODUCT_GROUP_TYPE_KEY',t:'NUMERIC',k:'',d:'ผลิตภัณฑ์ — Format code'},
+      {n:'PRODUCT_GROUP_TYPE_NAME',t:'VARCHAR',k:'',d:'ผลิตภัณฑ์ — Format description'},
+      {n:'QUOTE_TO_PREVERIFY_MINS',t:'NUMERIC',k:'',d:'ระยะเวลา (นาที) จากสถานะ Quote ไปยังสถานะ Preverify'},
+      {n:'QUOTE_TYPE_FIRST',t:'VARCHAR',k:'',d:'การ Quote ครั้งแรกเป็นการ Quote ประเภทไหน'},
+      {n:'REMARK',t:'VARCHAR',k:'',d:'Remark ของ Work ID'},
+      {n:'RENEW_FLAG',t:'VARCHAR',k:'',d:'เป็นเคส Renew หรือไม่'},
+      {n:'RUNNING_DATE',t:'TIMESTAMP',k:'',d:'วันที่อัพเดทข้อมูล'},
+      {n:'RUNNING_TELEPHONE_ID',t:'VARCHAR',k:'',d:'เบอร์โทรศัพท์ของลูกค้า — Format Dummy'},
+      {n:'SALE_DATE',t:'TIMESTAMP',k:'',d:'วันที่ Sale'},
+      {n:'SALES_TO_PRINT_MINS',t:'NUMERIC',k:'',d:'ระยะเวลา (นาที) จากสถานะ Sale ไปยังสถานะ Print'},
+      {n:'TOPIC_DESC',t:'VARCHAR',k:'',d:'Topic ที่สร้าง Lead — Format description'},
+      {n:'TOPIC_ID',t:'NUMERIC',k:'',d:'Topic ที่สร้าง Lead — Format Number'},
+      {n:'TOTAL_PREMIUM',t:'NUMERIC',k:'',d:'Premium จากการปิดเคสนี้ได้เป็นยอดเท่าไหร่'},
+      {n:'TURNAROUND_TIME_MINS',t:'NUMERIC',k:'',d:'ระยะเวลา (นาที) จากสถานะ New ไปยังสถานะ Print'},
+      {n:'WORK_ID_CREATE_DATE',t:'TIMESTAMP',k:'',d:'วันที่สร้าง WorkID/OppID'},
+      {n:'WORKOPP_KEY',t:'VARCHAR',k:'',d:'Key โดยการนำ WorkID และ OppID มาประกอบกัน'},
+      {n:'YM_CREATE_DATE',t:'VARCHAR',k:'',d:'เดือนที่สร้าง WorkID/OppID ในรูปแบบ Year-Month'},
+    ], logic:[
+      {f:'1-FLAG columns',r:'1 = เคยผ่านสถานะนั้น, 0 = ยังไม่ผ่าน\n*_IN_MONTH = นับเฉพาะที่เกิดภายในเดือนเดียวกับ NEW_DATE'},
+      {f:'WORKOPP_KEY',r:'Composite key = WorkID + OppID ใช้เป็น unique key สำหรับ join กับตารางอื่น'},
+    ], rels:['RUNNING_NO → DISTRIBUTION_PERFORMANCE.ALL_BOOKED_INS_PERFORMANCE.RUNNING_IOS_NO','REQUEST_NO → DISTRIBUTION_PERFORMANCE.ALL_BOOKED_LOAN_PERFORMANCE.AFS_REQUEST_NO']},
+
+    {id:'ulle', name:'UNIVERSE_LEAN_LOAN_EXTENSION', desc:'Extended loan lead universe — application, credit, customer demographics and digital channel detail', cols:[
+      {n:'OPPID',t:'CHAR',k:'PK/FK',d:'Unique Key — ระบบ Lead จะมีเลข OPPID / Direct จะเป็น Request No / K2 เลขของ K2'},
+      {n:'RUNNING_NO',t:'CHAR',k:'FK',d:'เลข Running No'},
+      {n:'APPLICATION_AUTHORITY',t:'CHAR',k:'',d:'ประเภทการอนุมัติของระบบ TFS ว่าเป็น In / Out / Auto Y'},
+      {n:'APPROVE_AMOUNT',t:'FLOAT',k:'',d:'วงเงินอนุมัติ'},
+      {n:'AS400_AUTHORITY',t:'CHAR',k:'',d:'ประเภทการอนุมัติของระบบ AS400 ว่าเป็น In / Out / Auto Y'},
+      {n:'AS400_AUTHORITY_USER_NAME',t:'CHAR',k:'',d:'ชื่อผู้อนุมัติ'},
+      {n:'AS400_AUTHORITY_TEAM',t:'CHAR',k:'',d:'Code ทีมอนุมัติของระบบ AS400'},
+      {n:'AUTHORITY_LEVEL',t:'CHAR',k:'',d:'Level ผู้อนุมัติ เช่น AM, BM, CSO'},
+      {n:'AUTHORITY_USER_NAME',t:'CHAR',k:'',d:'User Name จากระบบ AS400'},
+      {n:'CA_APP_STATUS',t:'CHAR',k:'',d:'สถานะเคสที่อยู่กับ CA'},
+      {n:'CA_DECISION_STATUS',t:'CHAR',k:'',d:'สถานะของ Lead เมื่อเข้าห้อง CA'},
+      {n:'CA_NAME',t:'CHAR',k:'',d:'ชื่อ CA'},
+      {n:'CA_PENDING_STATUS',t:'CHAR',k:'',d:'Lead ที่เข้าห้อง CA แล้ว pending อยู่ที่ไหน Branch / CA / Other'},
+      {n:'CA_REJECT_REASON',t:'CHAR',k:'',d:'คำอธิบาย Reject Reason ของ CA'},
+      {n:'CA_REJECT_REASON_CODE',t:'CHAR',k:'',d:'Code Reject Reason ของ CA'},
+      {n:'CAMP_CODE',t:'CHAR',k:'',d:'Marketing Source Code'},
+      {n:'CANCEL_GROUP_TYPE',t:'CHAR',k:'',d:'การจัดกลุ่ม Cancel'},
+      {n:'CAR_TYPE_AS400',t:'CHAR',k:'',d:'ประเภทรถจากระบบ AS400'},
+      {n:'CAR_TYPE_TFS',t:'CHAR',k:'',d:'ประเภทรถจากระบบ TFS'},
+      {n:'CUSTOMER_AGE',t:'NUMERIC',k:'',d:'อายุลูกค้า'},
+      {n:'CUSTOMER_AMPHOR_CURRENT',t:'CHAR',k:'',d:'อำเภอ ที่อยู่ปัจจุบัน'},
+      {n:'CUSTOMER_AMPHOR_REGIS',t:'CHAR',k:'',d:'อำเภอ ที่อยู่ตามทะเบียนบ้าน'},
+      {n:'CUSTOMER_AMPHOR_WORK',t:'CHAR',k:'',d:'อำเภอ ที่อยู่ที่ทำงาน'},
+      {n:'CUSTOMER_BIRTH_DATE',t:'DATE',k:'',d:'วันเกิดลูกค้า'},
+      {n:'CUSTOMER_GENDER',t:'CHAR',k:'',d:'เพศลูกค้า'},
+      {n:'CUSTOMER_OCCUPATION',t:'CHAR',k:'',d:'อาชีพลูกค้า'},
+      {n:'CUSTOMER_POSTCODE_CURRENT',t:'CHAR',k:'',d:'รหัสไปรษณีย์ ที่อยู่ปัจจุบัน'},
+      {n:'CUSTOMER_POSTCODE_REGIS',t:'CHAR',k:'',d:'รหัสไปรษณีย์ ที่อยู่ตามทะเบียนบ้าน'},
+      {n:'CUSTOMER_POSTCODE_WORK',t:'CHAR',k:'',d:'รหัสไปรษณีย์ ที่อยู่ที่ทำงาน'},
+      {n:'CUSTOMER_PROVINCE_CURRENT',t:'CHAR',k:'',d:'จังหวัด ที่อยู่ปัจจุบัน'},
+      {n:'CUSTOMER_PROVINCE_REGIS',t:'CHAR',k:'',d:'จังหวัด ที่อยู่ตามทะเบียนบ้าน'},
+      {n:'CUSTOMER_PROVINCE_WORK',t:'CHAR',k:'',d:'จังหวัด ที่อยู่ที่ทำงาน'},
+      {n:'CUSTOMER_SALARY',t:'FLOAT',k:'',d:'รายได้ของลูกค้า'},
+      {n:'CUSTOMER_STATUS_NAME',t:'CHAR',k:'',d:'สถานภาพลูกค้า'},
+      {n:'CUSTOMER_TAMBON_CURRENT',t:'CHAR',k:'',d:'ตำบล ที่อยู่ปัจจุบัน'},
+      {n:'CUSTOMER_TAMBON_REGIS',t:'CHAR',k:'',d:'ตำบล ที่อยู่ตามทะเบียนบ้าน'},
+      {n:'CUSTOMER_TAMBON_WORK',t:'CHAR',k:'',d:'ตำบล ที่อยู่ที่ทำงาน'},
+      {n:'CUSTOMER_TYPE',t:'CHAR',k:'',d:'ประเภทของลูกค้า'},
+      {n:'DATASOURCE',t:'CHAR',k:'',d:'ระบบที่มาของ Lead เช่น DIRE, K2, LEAD'},
+      {n:'DATE_APP_IN_CA',t:'DATE',k:'',d:'วันที่ส่ง CA'},
+      {n:'DATE_APPLICATION',t:'TIMESTAMP',k:'',d:'วันที่สร้าง Application (เกิดเลข Running No)'},
+      {n:'DATE_CA_SEND_BRANCH_FIRST_TIME',t:'TIMESTAMP',k:'',d:'วันที่ CA ส่งกลับสาขาครั้งแรก'},
+      {n:'DATE_CREATE_REQUEST_DETAIL_ID',t:'TIMESTAMP',k:'',d:'วันที่สร้าง Request Detail ID'},
+      {n:'DATE_VEHICLE_OWNER',t:'DATE',k:'',d:'วันที่ครอบครองรถ'},
+      {n:'DATE_VEHICLE_REGIS',t:'DATE',k:'',d:'วันที่จดทะเบียน'},
+      {n:'DIGITAL_CAMPAIGN',t:'CHAR',k:'',d:'ข้อมูล UTM ของฝั่ง Digital (มีแค่ Datasource = Lead)'},
+      {n:'DIGITAL_CONTENTX',t:'CHAR',k:'',d:'ข้อมูล UTM ของฝั่ง Digital (มีแค่ Datasource = Lead)'},
+      {n:'DIGITAL_DATE_FIRST_CALL',t:'DATE',k:'',d:'วันแรกที่โทร (มีแค่ Datasource = Lead)'},
+      {n:'DIGITAL_DATE_LAST_CALL',t:'DATE',k:'',d:'วันที่โทรครั้งล่าสุด (มีแค่ Datasource = Lead)'},
+      {n:'DIGITAL_DIAL_STATUS',t:'CHAR',k:'',d:'Status การโทร'},
+      {n:'DIGITAL_FIRST_MINUTE_RESPONSE',t:'FLOAT',k:'',d:'จำนวนนาที จากการรับสายครั้งแรก (มีแค่ Datasource = Lead)'},
+      {n:'DIGITAL_FIRST_RESPONSE_CALL',t:'FLOAT',k:'',d:'รับสายครั้งแรกจากการโทรครั้งที่เท่าไหร่ (มีแค่ Datasource = Lead)'},
+      {n:'DIGITAL_FLAG_CONTACT_LEAD',t:'CHAR',k:'',d:'Flag ว่าเป็น Contact Lead หรือไม่ (ต้องคุยมากกว่า 10 วินาทีจากการรับสายครั้งแรก)'},
+      {n:'DIGITAL_IK_TYPE',t:'CHAR',k:'',d:'Flag ว่าเป็นระบบ หรือ Manual Key Lead (มีแค่ Datasource = Lead)'},
+      {n:'DIGITAL_KEYWORD',t:'CHAR',k:'',d:'ข้อมูล UTM ของฝั่ง Digital (มีแค่ Datasource = Lead)'},
+      {n:'DIGITAL_MEDIUM',t:'CHAR',k:'',d:'ข้อมูล UTM ของฝั่ง Digital (มีแค่ Datasource = Lead)'},
+      {n:'DIGITAL_NO_OF_CALL',t:'FLOAT',k:'',d:'จำนวนครั้งที่โทร (มีแค่ Datasource = Lead)'},
+      {n:'DIGITAL_NO_OF_RESPONSE_CALL',t:'FLOAT',k:'',d:'จำนวนครั้งที่รับสาย (มีแค่ Datasource = Lead)'},
+      {n:'DIGITAL_SOURCE',t:'CHAR',k:'',d:'ข้อมูล UTM ของฝั่ง Digital (มีแค่ Datasource = Lead)'},
+      {n:'DIGITAL_SPECIAL_CAMPAIGN',t:'CHAR',k:'',d:'Flag Normal / Special ของฝั่ง Digital (มีแค่ Datasource = Lead)'},
+      {n:'DIGITAL_TOTAL_MINUTE',t:'FLOAT',k:'',d:'จำนวนนาทีที่คุยทั้งหมด รวมจากทุกสาย (มีแค่ Datasource = Lead)'},
+      {n:'FIRST_REMARK',t:'CHAR',k:'',d:'First Remark ของแต่ละ Lead (มีแค่ Datasource = Lead)'},
+      {n:'FLAG_APP_IN_CA',t:'FLOAT',k:'',d:'Flag Lead ที่เคยเข้าห้อง CA (เคยส่งงานนอกอำนาจ)'},
+      {n:'FLAG_APPLICATION',t:'FLOAT',k:'',d:'Flag ว่า Lead นั้นสร้าง Application หรือไม่'},
+      {n:'FLAG_APPLICATION_ADJUST',t:'FLOAT',k:'',d:'Flag ว่า Application นั้นมีการแก้ไขหรือไม่'},
+      {n:'FLAG_CHANNEL_AGENT',t:'FLOAT',k:'',d:'Flag Lead ช่องทาง Agent ทั้งหมด'},
+      {n:'FLAG_CHANNEL_BAY',t:'FLOAT',k:'',d:'Flag Lead ช่องทาง Bay ทั้งหมด'},
+      {n:'FLAG_CHANNEL_DEALER',t:'FLOAT',k:'',d:'Flag Lead ช่องทาง Dealer ทั้งหมด'},
+      {n:'FLAG_CHANNEL_DEALER_M_NEW',t:'FLOAT',k:'',d:'Flag Lead ช่องทาง Dealer M New ทั้งหมด'},
+      {n:'FLAG_CHANNEL_DEALER_M_USED',t:'FLOAT',k:'',d:'Flag Lead ช่องทาง Dealer M Used ทั้งหมด'},
+      {n:'FLAG_COMPETITOR',t:'CHAR',k:'',d:'Flag ว่ามีคู่แข่งหรือไม่'},
+      {n:'FLAG_LEAD_DIGITAL',t:'CHAR',k:'',d:'Flag ว่าเป็น Lead ของช่องทาง Digital หรือไม่'},
+      {n:'FLAG_REFINANCE',t:'CHAR',k:'',d:'Flag ว่าเป็น Refinance'},
+      {n:'FLAG_TLC',t:'CHAR',k:'',d:'Flag บัตรติดล้อ'},
+      {n:'INSTALLMENT_AMT',t:'FLOAT',k:'',d:'ค่างวด'},
+      {n:'LAST_STATUS_AS400',t:'CHAR',k:'',d:'สถานะล่าสุดของ AS400'},
+      {n:'NCB_GRADE',t:'CHAR',k:'',d:'NCB Grade'},
+      {n:'OLD_INSTALLMENT_AMT',t:'FLOAT',k:'',d:'ค่างวดจ่ายสัญญาเดิม มีแค่สัญญาที่เป็น TopUp'},
+      {n:'OWNER_PERIOD_MONTH',t:'NUMERIC',k:'',d:'ระยะเวลาถือครองกรรมสิทธิ์รถ (เดือน)'},
+      {n:'OWNER_PERIOD_YEAR',t:'NUMERIC',k:'',d:'ระยะเวลาถือครองกรรมสิทธิ์รถ (ปี)'},
+      {n:'PRODUCT_CODE',t:'CHAR',k:'',d:'Product Code ของ Lead นั้น — 10 / 20 / 65'},
+      {n:'PROGRAM',t:'CHAR',k:'',d:'Program ของแต่ละ Lead เช่น บัตรสินเชื่อ / สินเชื่อไม่มีบัตร'},
+      {n:'RATEBOOK',t:'FLOAT',k:'',d:'Ratebook'},
+      {n:'REQUEST_AMOUNT_AS400',t:'NUMERIC',k:'',d:'Request Amount จากระบบ AS400'},
+      {n:'REQUEST_AMOUNT_TFS',t:'FLOAT',k:'',d:'Request Amount จากระบบ TFS'},
+      {n:'SOURCE_OF_AWARENESS',t:'CHAR',k:'',d:'สื่อที่ลูกค้าเห็น'},
+      {n:'STATUS_CUSTOMER',t:'CHAR',k:'',d:'New Customer / Existing Customer'},
+      {n:'SUB_PROGRAM',t:'CHAR',k:'',d:'Sub Program ของแต่ละ Lead'},
+      {n:'TARGET',t:'CHAR',k:'',d:'เป้า product เช่น D, Q'},
+      {n:'TENOR',t:'FLOAT',k:'',d:'จำนวนงวด'},
+      {n:'VEHICLE_BRAND',t:'CHAR',k:'',d:'Brand รถ'},
+      {n:'VEHICLE_MODEL_AFS',t:'CHAR',k:'',d:'Model รถ'},
+      {n:'VEHICLE_REGIS_PLATE',t:'CHAR',k:'',d:'จังหวัดป้ายทะเบียนรถ'},
+      {n:'VIA_TELE_FIRST_TIME',t:'TIMESTAMP',k:'',d:'วันที่ Telesales มีการ Touch Lead ครั้งแรก จับจาก Status Click To Call'},
+    ], logic:[
+      {f:'DATASOURCE',r:'DIRE = Direct walk-in / K2 = ระบบ K2 / LEAD = ระบบ Lead'},
+      {f:'APPROVE_AMOUNT',r:'วงเงินที่ได้รับการอนุมัติ อาจต่างจาก REQUEST_AMOUNT_TFS หรือ REQUEST_AMOUNT_AS400'},
+      {f:'DIGITAL_* columns',r:'ข้อมูลจาก UTM และ call tracking มีเฉพาะ Datasource = Lead เท่านั้น'},
+    ], rels:['OPPID → DISTRIBUTION_PERFORMANCE.UNIVERSE_LEAD_LOAN.OPPID','RUNNING_NO → DISTRIBUTION_PERFORMANCE.ALL_BOOKED_LOAN_PERFORMANCE.AFS_REQUEST_NO']},
+  ]},
+
+  {id:'ap', name:'ACCOUNT_PORTFOLIO', color:'#0C6B50', owner:'Panij Chintraruck', tables:[
+    {id:'pdl', name:'PORTFOLIO_DAILY_LOAN', desc:'Daily loan portfolio snapshot with DPD, outstanding balance, and status', cols:[
+      {n:'F_MAX_DATE',t:'VARCHAR',k:'',d:"Flag indicating whether the date is the last day in the month. 'Y' = last day, 'N' = not last day"},
+      {n:'PAYMENT_DUE_DATE',t:'NUMERIC',k:'',d:'The scheduled date by which payment should be made'},
+      {n:'FIRST_DUE_DATE',t:'TIMESTAMP',k:'',d:'The date on which the first payment is due'},
+      {n:'DATA_DATE',t:'TIMESTAMP',k:'',d:'The date when the data was recorded or updated'},
+      {n:'LATEST_PAYMENT_DATE',t:'TIMESTAMP',k:'',d:'The most recent date on which a payment was made'},
+      {n:'OVERDUE_AGING_DAY',t:'NUMERIC',k:'',d:'The number of days a payment is overdue'},
+      {n:'LATEST_PAYMENT_AMT',t:'NUMERIC',k:'',d:'The amount paid in the most recent payment'},
+      {n:'OVERDUE_BALANCE',t:'NUMERIC',k:'',d:'The total amount of overdue payments'},
+      {n:'LOCAL_WRITE_OFF_TYPE',t:'VARCHAR',k:'',d:'Classification of local write-off: 1=Normal WO, 3=Early Repo, 4=Early Insurance, 5=Early Legal'},
+      {n:'INSTALLMENT_AMT',t:'NUMERIC',k:'',d:'The amount due for monthly installment'},
+      {n:'LOCAL_WRITE_OFF_DATE',t:'TIMESTAMP',k:'',d:'The date on which the debt was written off'},
+      {n:'BUCKET',t:'VARCHAR',k:'',d:'Categorization of delinquency level: Current, X DPD, 30 DPD, 60 DPD, 90 DPD, 120 DPD, 150 DPD, 180 DPD, CLOSE'},
+      {n:'OUTSTANDING_BALANCE',t:'NUMERIC',k:'',d:'Loan balance included accrued interest'},
+      {n:'BILL_CODE',t:'VARCHAR',k:'',d:'Account bill status code: 20000=ปกติ, 69001=WO ไม่ฟ้อง, 80005=เคลมซาก, 80006=เคลมรถหาย'},
+      {n:'INTEREST_CURRENT_AMT',t:'NUMERIC',k:'',d:'The current amount of interest due'},
+      {n:'REPO_LAST_STATUS_CODE',t:'VARCHAR',k:'',d:'Last repossession status: C=Redemption from W, W=Repo, S=SOLD, L=WO, I=Insurance'},
+      {n:'SUB_LOAN_TYPE',t:'VARCHAR',k:'',d:'Loan subtype: 0=Loan, 1=TLC, 2=Revolving'},
+      {n:'OS_BALANCE_NEW',t:'NUMERIC',k:'',d:'Outstanding Balance + PPI'},
+      {n:'AGREEMENT_NO',t:'VARCHAR',k:'FK',d:'Agreement Number — link with All Booked Loan'},
+      {n:'LAST_DUE_DATE',t:'TIMESTAMP',k:'',d:'The last due date payment'},
+      {n:'RUNNING_CITIZAN_NO',t:'VARCHAR',k:'FK',d:'Customer Key (New format) — link with Insurance Data'},
+      {n:'TENOR',t:'NUMERIC',k:'',d:'Total period of the loan agreement'},
+      {n:'VAT_OVERDUE_BALANCE',t:'NUMERIC',k:'',d:'VAT calculated on the overdue balance'},
+      {n:'CONTRACT_AMT',t:'NUMERIC',k:'',d:'The original amount agreed upon in the contract'},
+      {n:'OVERDUE_INTEREST',t:'NUMERIC',k:'',d:'Interest accrued on overdue payments'},
+      {n:'FINANCE_AMT',t:'NUMERIC',k:'',d:'The amount financed or loaned'},
+      {n:'UNEARN_INCOME_YTD',t:'NUMERIC',k:'',d:'Unearned income year-to-date'},
+      {n:'LOCAL_WRITE_OFF_AMOUNT',t:'NUMERIC',k:'',d:'The amount written off'},
+      {n:'PRINCIPAL_BALANCE',t:'NUMERIC',k:'',d:'Loan balance excluded accrued interest (pure principal)'},
+      {n:'FLAT_RATE',t:'NUMERIC',k:'',d:'A fixed interest rate'},
+      {n:'ACCOUNT_STATUS_KEY',t:'VARCHAR',k:'',d:'Account Status: C=Active, E=Closed, P=Active (card no loan), S=Active (Stop VAT)'},
+      {n:'EFFECTIVE_RATE',t:'NUMERIC',k:'',d:'The effective interest rate'},
+      {n:'CREDIT_LIMIT',t:'NUMERIC',k:'',d:'The maximum amount of credit available'},
+      {n:'OUTSTANDING_BALANCE_LAST_MONTH',t:'NUMERIC',k:'',d:'The outstanding balance at the end of the previous month'},
+      {n:'PRINCIPAL_BALANCE_LAST_MONTH',t:'NUMERIC',k:'',d:'The principal balance at the end of the previous month'},
+      {n:'DRP_Status',t:'VARCHAR',k:'',d:'Flag indicating Debt Relief Program "Yes" or "No"'},
+      {n:'PPI_OS_BALANCE',t:'NUMERIC',k:'',d:'Loan outstanding balance of PPI'},
+      {n:'OS_BALANCE_LAST_MONTH',t:'NUMERIC',k:'',d:'The total outstanding balance at the end of the previous month'},
+    ], logic:[
+      {f:'BUCKET',r:'Current = no overdue\nX DPD = 1-29 days overdue\n30/60/90/120/150/180 DPD = respective days overdue\nCLOSE = account closed'},
+      {f:'LOCAL_WRITE_OFF_TYPE',r:'1=Normal WO, 3=Early Repo, 4=Early Insurance, 5=Early Legal'},
+      {f:'ACCOUNT_STATUS_KEY',r:'C=Active, E=Closed, P=Active card with no loan balance, S=Active Stop VAT'},
+    ], rels:['AGREEMENT_NO → DISTRIBUTION_PERFORMANCE.ALL_BOOKED_LOAN_PERFORMANCE.AGREEMENT_NO','RUNNING_CITIZAN_NO → DISTRIBUTION_PERFORMANCE.ALL_BOOKED_INS_PERFORMANCE.CUSTOMER_KEY_INS']},
+  ]},
+];
+
+let terms = [
+  {term:'%LOS', cat:'Ratio', domain:'Distribution Performance',
+   def:'Percentage of loan on special mention — loans showing early signs of stress but not yet classified as non-performing.',
+   logic:'%LOS = (Outstanding balance of LOS loans / Total outstanding portfolio balance) × 100\nLOS classification triggered when DPD ≥ 30 and < 90.',
+   owner:'Panij Chintraruck', updated:'1 Apr 2026',
+   links:[{type:'col',name:'BUCKET',table:'PORTFOLIO_DAILY_LOAN',schema:'ACCOUNT_PORTFOLIO'},{type:'col',name:'OUTSTANDING_BALANCE',table:'PORTFOLIO_DAILY_LOAN',schema:'ACCOUNT_PORTFOLIO'}]},
+  {term:'DPD30+', cat:'Metric', domain:'Distribution Performance',
+   def:'Days past due 30 or more — loans where the borrower has missed payment by at least 30 days. Used as an early delinquency indicator.',
+   logic:'DPD = Current date − Due date of earliest unpaid instalment\nDPD30+ flag = TRUE when DPD ≥ 30',
+   owner:'Panij Chintraruck', updated:'1 Apr 2026',
+   links:[{type:'col',name:'OVERDUE_AGING_DAY',table:'PORTFOLIO_DAILY_LOAN',schema:'ACCOUNT_PORTFOLIO'},{type:'col',name:'BUCKET',table:'PORTFOLIO_DAILY_LOAN',schema:'ACCOUNT_PORTFOLIO'}]},
+  {term:'DPD90+', cat:'Metric', domain:'Distribution Performance',
+   def:'Days past due 90 or more — loans classified as non-performing. Triggers provisioning and potential write-off review.',
+   logic:'DPD = Current date − Due date of earliest unpaid instalment\nDPD90+ flag = TRUE when DPD ≥ 90\nAuto-sets BUCKET = 90 DPD in PORTFOLIO_DAILY_LOAN.',
+   owner:'Panij Chintraruck', updated:'1 Apr 2026',
+   links:[{type:'col',name:'OVERDUE_AGING_DAY',table:'PORTFOLIO_DAILY_LOAN',schema:'ACCOUNT_PORTFOLIO'},{type:'col',name:'BUCKET',table:'PORTFOLIO_DAILY_LOAN',schema:'ACCOUNT_PORTFOLIO'}]},
+  {term:'Effective interest rate', cat:'Ratio', domain:'Distribution Performance',
+   def:'The annualized cost of credit to the borrower inclusive of all fees and charges, as required by BOT disclosure circular.',
+   logic:'EIR = ((Total repayment − Principal) / Principal) × (12 / Tenor) × 100',
+   owner:'Panij Chintraruck', updated:'28 Mar 2026',
+   links:[{type:'col',name:'EFFECTIVE_RATE',table:'ALL_BOOKED_LOAN_PERFORMANCE',schema:'DISTRIBUTION_PERFORMANCE'},{type:'col',name:'EFFECTIVE_RATE',table:'PORTFOLIO_DAILY_LOAN',schema:'ACCOUNT_PORTFOLIO'}]},
+  {term:'FPD', cat:'Metric', domain:'Distribution Performance',
+   def:'First payment default — a borrower who misses their very first repayment instalment. A key origination quality signal.',
+   logic:'FPD = TRUE when instalment_1_paid = FALSE as of due_date_1 + 1 day\nMonitored at 7, 14, and 30 days post first due date.',
+   owner:'Panij Chintraruck', updated:'1 Apr 2026',
+   links:[{type:'tbl',name:'PORTFOLIO_DAILY_LOAN',schema:'ACCOUNT_PORTFOLIO'},{type:'col',name:'FIRST_DUE_DATE',table:'PORTFOLIO_DAILY_LOAN',schema:'ACCOUNT_PORTFOLIO'}]},
+  {term:'NEA', cat:'Metric', domain:'Distribution Performance',
+   def:'Net exposure at risk — the outstanding principal balance of loans classified DPD90+ or write-off, net of provisions.',
+   logic:'NEA = SUM(OUTSTANDING_BALANCE of BUCKET=90DPD+ or WO loans) − Total provisions held\nReported monthly to risk committee.',
+   owner:'Panij Chintraruck', updated:'15 Mar 2026',
+   links:[{type:'col',name:'OUTSTANDING_BALANCE',table:'PORTFOLIO_DAILY_LOAN',schema:'ACCOUNT_PORTFOLIO'},{type:'col',name:'LOCAL_WRITE_OFF_AMOUNT',table:'PORTFOLIO_DAILY_LOAN',schema:'ACCOUNT_PORTFOLIO'}]},
+  {term:'Net booking amount', cat:'Metric', domain:'Distribution Performance',
+   def:'Total principal disbursed to a borrower after deducting any upfront fees or charges at origination.',
+   logic:'NET_BOOKING_AMOUNT = FINANCE_AMT − PPI_PREMIUM',
+   owner:'Panij Chintraruck', updated:'2 Apr 2026',
+   links:[{type:'col',name:'FINANCE_AMT_NET',table:'ALL_BOOKED_LOAN_PERFORMANCE',schema:'DISTRIBUTION_PERFORMANCE'},{type:'col',name:'FINANCE_AMT',table:'PORTFOLIO_DAILY_LOAN',schema:'ACCOUNT_PORTFOLIO'}]},
+  {term:'Volume', cat:'Metric', domain:'Distribution Performance',
+   def:'Total number of loans booked within a given period. Used as the primary origination volume KPI across distribution channels.',
+   logic:'Volume = COUNT(AGREEMENT_NO) WHERE CONTRACT_DATE BETWEEN period_start AND period_end\nExcludes cancelled or rejected applications.',
+   owner:'Panij Chintraruck', updated:'2 Apr 2026',
+   links:[{type:'tbl',name:'ALL_BOOKED_LOAN_PERFORMANCE',schema:'DISTRIBUTION_PERFORMANCE'},{type:'col',name:'AGREEMENT_NO',table:'ALL_BOOKED_LOAN_PERFORMANCE',schema:'DISTRIBUTION_PERFORMANCE'}]},
+];
+
+/* ══════════════════════════════════════
+   HELPERS
+══════════════════════════════════════ */
+const catColors = {Metric:'tag-blue', Ratio:'tag-purple', Date:'tag-amber', Dimension:'tag-green', Status:'tag-gray'};
+const domColors = {'Distribution Performance':'tag-blue', Customer:'tag-teal', 'Finance & Risk':'tag-amber', 'Cross-domain':'tag-gray', 'Operations':'tag-green'};
+
+function showToast(msg){
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2200);
+}
+function updateStats(){
+  const tables=schemas.reduce((a,s)=>a+s.tables.length,0);
+  const cols=schemas.reduce((a,s)=>a+s.tables.reduce((b,t)=>b+t.cols.length,0),0);
+  const fks=schemas.reduce((a,s)=>a+s.tables.reduce((b,t)=>b+(t.rels?t.rels.length:0),0),0);
+  document.getElementById('stat-schemas').textContent=schemas.length;
+  document.getElementById('stat-tables').textContent=tables;
+  document.getElementById('stat-cols').textContent=cols;
+  document.getElementById('stat-fk').textContent=fks;
+  document.getElementById('nb-schema').textContent=tables;
+  document.getElementById('nb-gl').textContent=terms.length;
+}
+function getDomains(){
+  const d=new Set(terms.map(t=>t.domain));
+  schemas.forEach(s=>d.add(s.name.replace(/_/g,' ').replace(/\b(\w)/g,m=>m)));
+  return [...d].sort();
+}
+function refreshDomainDropdowns(){
+  const doms=getDomains();
+  ['gl-domain','gld'].forEach(id=>{
+    const sel=document.getElementById(id);
+    const cur=sel.value;
+    sel.innerHTML='<option value="">'+(id==='gl-domain'?'All domains':'Select domain...')+'</option>';
+    doms.forEach(d=>{const o=document.createElement('option');o.value=d;o.textContent=d;sel.appendChild(o);});
+    sel.value=cur;
+  });
+  const atSel=document.getElementById('at-schema');
+  const cur=atSel.value;
+  atSel.innerHTML='<option value="">Select existing schema...</option>';
+  schemas.forEach(s=>{const o=document.createElement('option');o.value=s.id;o.textContent=s.name;atSel.appendChild(o);});
+  atSel.value=cur;
+}
+
+/* ══════════════════════════════════════
+   NAVIGATION
+══════════════════════════════════════ */
+const PAGES=['schema','glossary','search'];
+const LABELS={schema:'Data Dictionary',glossary:'Glossary',search:'Search results'};
+function go(name, navEl, isAdmin){
+  // ── always fully restore both pages before switching ──
+  document.getElementById('add-table-form').classList.remove('open');
+  document.getElementById('schema-stats').style.display='';
+  document.getElementById('schema-wrap').style.display='flex';
+  document.getElementById('gl-form').classList.remove('open');
+  // restore gl-toolbar visibility — respect editor-hidden class
+  const glToolbar=document.getElementById('gl-toolbar');
+  glToolbar.style.display='';  // inline style clears; CSS class takes over correctly
+  document.getElementById('gl-tbl').style.display='';
+  document.getElementById('gl-list-view').style.display='block';
+  document.getElementById('gl-detail-view').style.display='none';
+
+  PAGES.forEach(p=>{const pg=document.getElementById('p-'+p);if(pg)pg.classList.remove('active');});
+  const t=document.getElementById('p-'+name);if(t)t.classList.add('active');
+
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  let el=navEl;
+  if(typeof navEl==='string') el=document.getElementById(navEl);
+  if(el && el.classList && el.classList.contains('ni')) el.classList.add('active');
+
+  document.getElementById('bc').innerHTML='<span>'+(LABELS[name]||name)+'</span>';
+  document.getElementById('gs').value='';
+}
+
+/* ══════════════════════════════════════
+   SCHEMA TREE
+══════════════════════════════════════ */
+let selTbl=null;
+let treeCollapsed=false;
+function buildTree(filter){
+  const tree=document.getElementById('stree');tree.innerHTML='';
+  schemas.forEach(s=>{
+    const tbls=s.tables.filter(t=>!filter||t.name.toLowerCase().includes(filter)||s.name.toLowerCase().includes(filter));
+    if(!tbls.length)return;
+    const sg=document.createElement('div');sg.className='schema-grp';
+    const hd=document.createElement('div');hd.className='sg-hd';
+    hd.innerHTML=`<div class="sg-dot" style="background:${s.color}"></div><div class="sg-name">${s.name}</div><div class="sg-count">${tbls.length}t</div><svg class="chv open" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+    const rows=document.createElement('div');rows.className='t-rows';
+    tbls.forEach(t=>{
+      const tr=document.createElement('div');tr.className='trow'+(selTbl&&selTbl.id===t.id?' sel':'');
+      tr.innerHTML=`<div class="trow-n">${t.name}</div><div class="trow-c">${t.cols.length}c</div>`;
+      tr.onclick=()=>selTable(t,s);
+      rows.appendChild(tr);
+    });
+    hd.onclick=()=>{const o=rows.style.display!=='none';rows.style.display=o?'none':'block';hd.querySelector('.chv').classList.toggle('open',!o);};
+    sg.appendChild(hd);sg.appendChild(rows);tree.appendChild(sg);
+  });
+}
+function toggleTree(){
+  const p=document.getElementById('tree-panel');
+  const wrap=document.getElementById('schema-wrap');
+  treeCollapsed=!treeCollapsed;
+  p.classList.toggle('collapsed',treeCollapsed);
+  wrap.classList.toggle('tree-hidden',treeCollapsed);
+}
+function selTable(t,s){
+  selTbl=t;
+  buildTree(document.getElementById('sf').value.toLowerCase());
+  document.getElementById('dp-empty').style.display='none';
+  document.getElementById('dp-inner').style.display='flex';
+  document.getElementById('dp-title').textContent=t.name;
+  document.getElementById('dp-meta').textContent=t.desc+' · '+s.name+' · '+t.cols.length+' columns';
+  const tb=document.getElementById('ctbody');tb.innerHTML='';
+  t.cols.forEach(c=>{
+    const tr=document.createElement('tr');
+    const kb=c.k==='PK'?'<span class="pk-badge">PK</span>':c.k==='FK'?'<span class="fk-badge">FK</span>':'';
+    tr.innerHTML=`<td class="col-name">${c.n}</td><td><span class="type-badge">${c.t}</span></td><td>${kb}</td><td style="color:var(--text2)">${c.d}</td>`;
+    tb.appendChild(tr);
+  });
+  const ll=document.getElementById('logic-list');ll.innerHTML='';
+  if(t.logic&&t.logic.length){
+    t.logic.forEach(l=>{ll.innerHTML+=`<div><div style="font-size:10px;font-weight:700;font-family:var(--mono);color:var(--text);margin-bottom:4px">${l.f}</div><div class="lblock"><div class="llbl">Rule</div>${l.r}</div></div>`;});
+  }else{ll.innerHTML='<div style="font-size:12px;color:#bbb">No business logic defined for this table.</div>';}
+  const rl=document.getElementById('rel-list');rl.innerHTML='';
+  if(t.rels&&t.rels.length){t.rels.forEach(r=>{rl.innerHTML+=`<div class="rel-row">${r}</div>`;});}
+  else{rl.innerHTML='<div style="font-size:12px;color:#bbb">No relations defined.</div>';}
+  dptab('cols',document.querySelector('.dp-tab'));
+}
+function dptab(name,el){
+  document.querySelectorAll('.dp-sec').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.dp-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('dp-'+name).classList.add('active');
+  if(el)el.classList.add('active');
+}
+
+/* ══════════════════════════════════════
+   ADD TABLE
+══════════════════════════════════════ */
+function openAddTableForm(){
+  if(!isEditor)return;
+  refreshDomainDropdowns();
+  document.getElementById('add-table-form').classList.add('open');
+  document.getElementById('schema-wrap').style.display='none';
+  document.getElementById('schema-stats').style.display='none';
+  document.getElementById('bc').innerHTML='<span>Add Table / Schema</span>';
+  document.getElementById('col-rows').innerHTML='';
+  addColRow();
+}
+function closeAddTableForm(){
+  document.getElementById('add-table-form').classList.remove('open');
+  document.getElementById('schema-wrap').style.display='flex';
+  document.getElementById('schema-stats').style.display='';
+  // restore highlight to Browse/Dictionary and update breadcrumb
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  document.getElementById('nav-schema').classList.add('active');
+  document.getElementById('bc').innerHTML='<span>Data Dictionary</span>';
+}
+function addColRow(){
+  const div=document.createElement('div');div.className='col-row';
+  div.innerHTML=`<input placeholder="COLUMN_NAME"/><input placeholder="VARCHAR"/><select><option value="">—</option><option value="PK">PK</option><option value="FK">FK</option></select><input placeholder="Description"/><button class="rm-col" onclick="this.parentElement.remove()">×</button>`;
+  document.getElementById('col-rows').appendChild(div);
+}
+function saveTable(){
+  const schId=document.getElementById('at-schema').value;
+  const newSch=document.getElementById('at-newschema').value.trim().toUpperCase();
+  const name=document.getElementById('at-name').value.trim().toUpperCase();
+  const desc=document.getElementById('at-desc').value.trim();
+  if(!name){alert('Table name is required.');return;}
+  const cols=[];
+  document.querySelectorAll('#col-rows .col-row').forEach(row=>{
+    const inputs=row.querySelectorAll('input');
+    const sel=row.querySelector('select');
+    const n=inputs[0].value.trim().toUpperCase();
+    if(!n)return;
+    cols.push({n,t:inputs[1].value.trim().toUpperCase()||'VARCHAR',k:sel.value,d:inputs[3].value.trim()});
+  });
+  if(!cols.length){alert('Add at least one column.');return;}
+  const logicRaw=document.getElementById('at-logic').value.trim();
+  const logic=logicRaw?[{f:'Rule',r:logicRaw}]:[];
+  const relsRaw=document.getElementById('at-rels').value.trim();
+  const rels=relsRaw?relsRaw.split('|').map(s=>s.trim()).filter(Boolean):[];
+  const tbl={id:'t'+Date.now(),name,desc,cols,logic,rels};
+  if(newSch){
+    const color=['#1856A0','#0C6B50','#7A4800','#4B3BAA'][schemas.length%4];
+    schemas.push({id:'s'+Date.now(),name:newSch,color,owner:'',tables:[tbl]});
+  } else if(schId){
+    const sch=schemas.find(s=>s.id===schId);
+    if(sch)sch.tables.push(tbl);
+  } else {alert('Select a schema or enter a new schema name.');return;}
+  updateStats();buildTree('');closeAddTableForm();
+  showToast('Table '+name+' saved.');
+  ['at-name','at-desc','at-logic','at-rels','at-newschema'].forEach(id=>document.getElementById(id).value='');
+}
+
+/* ══════════════════════════════════════
+   EDIT TABLE (simple: reload form)
+══════════════════════════════════════ */
+function editSelectedTable(){
+  if(!selTbl)return;
+  openAddTableForm();
+  document.getElementById('at-name').value=selTbl.name;
+  document.getElementById('at-desc').value=selTbl.desc||'';
+  selTbl.cols.forEach((c,i)=>{
+    if(i>0)addColRow();
+    const rows=document.querySelectorAll('#col-rows .col-row');
+    const row=rows[rows.length-1];
+    row.querySelectorAll('input')[0].value=c.n;
+    row.querySelectorAll('input')[1].value=c.t;
+    row.querySelector('select').value=c.k||'';
+    row.querySelectorAll('input')[3].value=c.d;
+  });
+  document.getElementById('at-logic').value=(selTbl.logic||[]).map(l=>l.f+': '+l.r).join('\n');
+  document.getElementById('at-rels').value=(selTbl.rels||[]).join(' | ');
+}
+
+/* ══════════════════════════════════════
+   DELETE TABLE
+══════════════════════════════════════ */
+function deleteSelectedTable(){
+  if(!selTbl)return;
+  if(!confirm('Delete table "'+selTbl.name+'"? This cannot be undone.'))return;
+  schemas.forEach(s=>{s.tables=s.tables.filter(t=>t.id!==selTbl.id);});
+  // remove empty schemas
+  schemas=schemas.filter(s=>s.tables.length>0);
+  selTbl=null;
+  document.getElementById('dp-empty').style.display='flex';
+  document.getElementById('dp-inner').style.display='none';
+  updateStats();buildTree('');
+  showToast('Table deleted.');
+}
+
+/* ══════════════════════════════════════
+   DELETE GLOSSARY TERM
+══════════════════════════════════════ */
+let currentTermIdx=null;
+function deleteCurrentTerm(){
+  if(currentTermIdx===null)return;
+  const t=terms[currentTermIdx];
+  if(!t)return;
+  if(!confirm('Delete term "'+t.term+'"? This cannot be undone.'))return;
+  terms.splice(currentTermIdx,1);
+  currentTermIdx=null;
+  showGlList();renderGlList();updateStats();
+  showToast('Term deleted.');
+}
+
+/* ══════════════════════════════════════
+   SAVE / LOAD JSON
+══════════════════════════════════════ */
+function saveJSON(){
+  const data={schemas,terms,exportedAt:new Date().toISOString()};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='ntl_data_catalog_'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();URL.revokeObjectURL(a.href);
+  showToast('Exported ntl_data_catalog JSON.');
+}
+function loadJSON(input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const data=JSON.parse(e.target.result);
+      if(!data.schemas||!data.terms){alert('Invalid catalog JSON — missing "schemas" or "terms".');return;}
+      if(!confirm('Import will REPLACE all current data. Continue?'))return;
+      schemas.length=0;
+      data.schemas.forEach(s=>schemas.push(s));
+      terms.length=0;
+      data.terms.forEach(t=>terms.push(t));
+      selTbl=null;
+      currentTermIdx=null;
+      document.getElementById('dp-empty').style.display='flex';
+      document.getElementById('dp-inner').style.display='none';
+      updateStats();buildTree('');renderGlList();refreshDomainDropdowns();
+      showToast('Imported: '+(data.schemas.length)+' schemas, '+(data.terms.length)+' terms.');
+    }catch(err){alert('Invalid JSON file: '+err.message);}
+    input.value='';
+  };
+  reader.readAsText(file);
+}
+
+/* ══════════════════════════════════════
+   GLOSSARY
+══════════════════════════════════════ */
+function renderGlList(){
+  const q=(document.getElementById('gl-q').value||'').toLowerCase();
+  const dom=document.getElementById('gl-domain').value;
+  const cat=document.getElementById('gl-cat').value;
+  const body=document.getElementById('gl-body');
+  const filtered=terms.filter(t=>
+    (!q||t.term.toLowerCase().includes(q)||t.def.toLowerCase().includes(q)||(t.logic||'').toLowerCase().includes(q))&&
+    (!dom||t.domain===dom)&&
+    (!cat||t.cat===cat)
+  );
+  if(!filtered.length){body.innerHTML='<tr><td colspan="6" style="text-align:center;padding:28px;color:#bbb;font-size:12px">No terms found.</td></tr>';return;}
+  body.innerHTML=filtered.map((t,i)=>`
+    <tr data-termidx="${terms.indexOf(t)}" class="gl-row-item" style="cursor:pointer">
+      <td><div class="term-name">${t.term}</div><div style="margin-top:3px"><span class="tag ${catColors[t.cat]||'tag-gray'}">${t.cat||''}</span></div></td>
+      <td><div class="term-def">${t.def.length>95?t.def.substring(0,95)+'…':t.def}</div></td>
+      <td><span class="tag ${domColors[t.domain]||'tag-gray'}">${t.domain}</span></td>
+      <td class="links-ct">${t.links?t.links.length:0}</td>
+      <td class="upd">${t.updated||''}</td>
+      <td style="color:#bbb;font-size:14px">›</td>
+    </tr>`).join('');
+  // attach click handlers safely via JS (avoids any string escaping issues)
+  body.querySelectorAll('tr.gl-row-item').forEach(row=>{
+    row.addEventListener('click',()=>{
+      const idx=parseInt(row.getAttribute('data-termidx'),10);
+      showGlDetailByIdx(idx);
+    });
+  });
+}
+function showGlDetailByIdx(idx){
+  currentTermIdx=idx;
+  const t=terms[idx];if(!t)return;
+  showGlDetailObj(t);
+}
+function showGlDetail(termName){
+  const t=terms.find(x=>x.term===termName);if(!t)return;
+  showGlDetailObj(t);
+}
+function showGlDetailObj(t){
+  document.getElementById('gl-list-view').style.display='none';
+  document.getElementById('gl-detail-view').style.display='block';
+  document.getElementById('bc').innerHTML='<span>Glossary</span> / '+t.term;
+  document.getElementById('dv-term').textContent=t.term;
+  document.getElementById('dv-tags').innerHTML=`<span class="tag ${catColors[t.cat]||'tag-gray'}">${t.cat||'—'}</span><span class="tag ${domColors[t.domain]||'tag-gray'}">${t.domain}</span>`;
+  document.getElementById('dv-def').textContent=t.def;
+  const lbl=document.getElementById('dv-logic-lbl');
+  const logic=document.getElementById('dv-logic');
+  if(t.logic){lbl.style.display='';logic.style.display='';logic.textContent=t.logic;}
+  else{lbl.style.display='none';logic.style.display='none';}
+  document.getElementById('dv-meta').innerHTML=`
+    <div class="dv-meta-item"><div class="dv-meta-lbl">Owner</div><div class="dv-meta-val">${t.owner||'—'}</div></div>
+    <div class="dv-meta-item"><div class="dv-meta-lbl">Last updated</div><div class="dv-meta-val">${t.updated||'—'}</div></div>
+    <div class="dv-meta-item"><div class="dv-meta-lbl">Linked assets</div><div class="dv-meta-val">${t.links?t.links.length:0} link${t.links&&t.links.length!==1?'s':''}</div></div>`;
+  document.getElementById('dv-links').innerHTML=t.links&&t.links.length
+    ?t.links.map(l=>`<div class="link-row"><span class="link-type ${l.type==='tbl'?'lt-tbl':'lt-col'}">${l.type==='tbl'?'Table':'Column'}</span><span class="link-name">${l.name}${l.table?' · '+l.table:''}</span><span class="link-schema">${l.schema}</span></div>`).join('')
+    :'<div style="font-size:12px;color:#bbb;padding:8px 0">No linked assets.</div>';
+}
+function showGlList(){
+  currentTermIdx=null;
+  document.getElementById('gl-detail-view').style.display='none';
+  document.getElementById('gl-list-view').style.display='block';
+  document.getElementById('bc').innerHTML='<span>Glossary</span>';
+}
+function openAddGl(){
+  refreshDomainDropdowns();
+  document.getElementById('gl-form').classList.add('open');
+  document.getElementById('gl-tbl').style.display='none';
+  document.getElementById('gl-toolbar').style.display='none';
+  document.getElementById('bc').innerHTML='<span>Add Glossary Term</span>';
+}
+function closeAddGl(){
+  document.getElementById('gl-form').classList.remove('open');
+  document.getElementById('gl-tbl').style.display='';
+  document.getElementById('gl-toolbar').style.display='';
+  ['glt','gldef','gllog','glowner'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('gld').value='';document.getElementById('glcat').value='';
+  // restore highlight to Glossary and update breadcrumb
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  document.getElementById('nav-glossary').classList.add('active');
+  document.getElementById('bc').innerHTML='<span>Glossary</span>';
+}
+function saveGl(){
+  const term=document.getElementById('glt').value.trim();
+  const def=document.getElementById('gldef').value.trim();
+  if(!term||!def){alert('Term name and definition are required.');return;}
+  const today=new Date();
+  const updated=today.getDate()+' '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][today.getMonth()]+' '+today.getFullYear();
+  terms.unshift({
+    term,def,
+    cat:document.getElementById('glcat').value||'Metric',
+    domain:document.getElementById('gld').value||'Cross-domain',
+    logic:document.getElementById('gllog').value.trim(),
+    owner:document.getElementById('glowner').value.trim()||'—',
+    updated,links:[]
+  });
+  closeAddGl();renderGlList();updateStats();
+  showToast('Term "'+term+'" saved.');
+}
+
+/* ══════════════════════════════════════
+   GLOBAL SEARCH
+══════════════════════════════════════ */
+let searchTimer;
+function buildSearchData(){
+  const data=[];
+  schemas.forEach(s=>{
+    data.push({type:'Schema',name:s.name,desc:(s.tables.length+' tables · Owner: '+s.owner)});
+    s.tables.forEach(t=>{
+      data.push({type:'Table',name:t.name,desc:t.desc+' · '+s.name});
+      t.cols.forEach(c=>{
+        data.push({type:'Column',name:c.n,desc:c.t+(c.k?' ['+c.k+']':'')+' · '+t.name});
+      });
+    });
+  });
+  terms.forEach(t=>{data.push({type:'Glossary',name:t.term,desc:t.domain+' · '+t.def.substring(0,60)+'…'});});
+  return data;
+}
+function doSearch(v){
+  clearTimeout(searchTimer);
+  if(!v.trim()){go('schema',document.getElementById('nav-schema'));return;}
+  searchTimer=setTimeout(()=>{
+    const q=v.toLowerCase();
+    const res=buildSearchData().filter(d=>d.name.toLowerCase().includes(q)||d.desc.toLowerCase().includes(q));
+    document.getElementById('sr-sub').textContent=res.length+' result'+(res.length!==1?'s':'')+' for "'+v+'"';
+    // show search page
+    PAGES.forEach(p=>{const pg=document.getElementById('p-'+p);if(pg)pg.classList.remove('active');});
+    document.getElementById('p-search').classList.add('active');
+    document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+    document.getElementById('bc').innerHTML='<span>Search results</span>';
+    if(!res.length){
+      document.getElementById('sr-list').innerHTML='<div style="font-size:12px;color:#bbb;padding:12px 0">No results found.</div>';
+      return;
+    }
+    // render clickable result cards
+    const list=document.getElementById('sr-list');
+    list.innerHTML=res.map((r,i)=>`
+      <div class="sri" data-sridx="${i}" style="cursor:pointer">
+        <div class="sri-type">${r.type}</div>
+        <div class="sri-name">${r.name}</div>
+        <div class="sri-desc">${r.desc}</div>
+      </div>`).join('');
+    // bind clicks
+    list.querySelectorAll('.sri').forEach(card=>{
+      const idx=parseInt(card.getAttribute('data-sridx'),10);
+      const r=res[idx];
+      card.addEventListener('click',()=>{
+        if(r.type==='Glossary'){
+          go('glossary','nav-glossary');
+          // ensure list view visible
+          document.getElementById('gl-list-view').style.display='block';
+          document.getElementById('gl-detail-view').style.display='none';
+          showGlDetail(r.name);
+        } else if(r.type==='Table'||r.type==='Schema'||r.type==='Column'){
+          go('schema','nav-schema');
+          // find & select the table
+          let foundTbl=null, foundSch=null;
+          schemas.forEach(s=>{
+            if(r.type==='Schema'&&s.name===r.name){foundSch=s;foundTbl=s.tables[0]||null;}
+            s.tables.forEach(t=>{
+              if(r.type==='Table'&&t.name===r.name){foundTbl=t;foundSch=s;}
+              if(r.type==='Column'){t.cols.forEach(c=>{if(c.n===r.name&&r.desc.includes(t.name)){foundTbl=t;foundSch=s;}});}
+            });
+          });
+          if(foundTbl&&foundSch) selTable(foundTbl,foundSch);
+        }
+        document.getElementById('gs').value='';
+      });
+    });
+  },180);
+}
+
+/* ══════════════════════════════════════
+   ACCESS CONTROL
+   Simple hash — works on file:// and https://
+   Hash of "Dreamer" via djb2
+══════════════════════════════════════ */
+function djb2(str){
+  let h=5381;
+  for(let i=0;i<str.length;i++) h=((h<<5)+h)^str.charCodeAt(i);
+  return (h>>>0).toString(16);
+}
+const EDITOR_HASH = djb2('Dreamer'); // pre-computed at load; correct value gates access
+
+let isEditor=false;
+
+function tryUnlock(){
+  const val=document.getElementById('pw-input').value.trim();
+  if(!val){showPwErr('Enter password.');return;}
+  if(djb2(val)===EDITOR_HASH){
+    setEditorMode(true);
+    document.getElementById('pw-input').value='';
+    showToast('Editor mode unlocked ✓');
+  } else {
+    showPwErr('Incorrect password.');
+    document.getElementById('pw-input').value='';
+    document.getElementById('pw-input').focus();
+  }
+}
+
+function lockEditor(){
+  setEditorMode(false);
+  go('schema','nav-schema');
+  showToast('Locked — viewer mode.');
+}
+
+function showPwErr(msg){
+  const el=document.getElementById('pw-err');
+  el.textContent=msg;
+  setTimeout(()=>{el.textContent='';},2500);
+}
+
+function setEditorMode(on){
+  isEditor=on;
+  // toggle visibility by adding/removing the class itself
+  document.querySelectorAll('.editor-only').forEach(el=>{
+    if(on){
+      el.classList.remove('editor-hidden');
+    } else {
+      el.classList.add('editor-hidden');
+    }
+  });
+  document.getElementById('unlock-viewer-row').style.display=on?'none':'flex';
+  document.getElementById('unlock-editor-row').style.display=on?'flex':'none';
+  document.getElementById('unlock-panel').classList.toggle('editor-active',on);
+  document.getElementById('user-role').textContent=on?'Editor · DG':'Viewer · DG';
+}
+
+/* ══════════════════════════════════════
+   INIT
+══════════════════════════════════════ */
+refreshDomainDropdowns();
+buildTree('');
+renderGlList();
+updateStats();
+setEditorMode(false); // read-only by default
+</script>
+</body>
+</html>
